@@ -14,6 +14,21 @@
 #                                                                                        
 ##########################################################################################
 
+# Green color for advertisement
+GREEN="\033[0;32m"
+RESET="\033[0m"
+
+# Advertisement in Green
+echo -e "${GREEN}"
+echo "🚀 THIS SCRIPT IS PROUDLY CREATED BY **GA CRYPTO**! 🚀"
+echo "==============================================="
+echo "🚀 Follow us for updates and more:"
+echo "   • Telegram: https://t.me/GaCryptOfficial"
+echo "   • X (formerly Twitter): https://x.com/GACryptoO"
+echo "==============================================="
+echo -e "${RESET}"
+
+# Installation and configuration process starts here
 echo "==========================================================="
 echo "🚀 Starting installation and configuration of Multiple Node 🚀"
 echo "==========================================================="
@@ -24,15 +39,25 @@ wget https://cdn.app.multiple.cc/client/linux/x64/multipleforlinux.tar
 
 # Extract the tarball
 echo "📂 Extracting the installation package..."
-tar -xvf multipleforlinux.tar
+if tar -xvf multipleforlinux.tar; then
+  echo "Extraction successful!"
+else
+  echo "Error: Extraction failed!"
+  exit 1
+fi
 
 # Grant permissions to the extracted folder
 echo "🔑 Granting permissions to the extracted folder..."
 chmod -R 777 multipleforlinux
 
-# Navigate to the extracted directory
-echo "📂 Navigating to the extracted directory..."
-cd multipleforlinux
+# Check if the directory exists
+if [ -d "multipleforlinux" ]; then
+  echo "📂 Navigating to the extracted directory..."
+  cd multipleforlinux
+else
+  echo "Error: multipleforlinux directory not found!"
+  exit 1
+fi
 
 # Grant executable permissions to CLI and Node binaries
 echo "🔧 Setting executable permissions..."
@@ -49,7 +74,7 @@ source /etc/profile
 
 # Start the Multiple node in the background
 echo "🚀 Starting the Multiple node..."
-nohup /workspaces/Gaia_Node/multipleforlinux/multiple-node > output.log 2>&1 &
+nohup ./multiple-node > output.log 2>&1 &
 
 # Prompt the user for the identifier
 read -p "Enter your identifier (XXXXXXXX): " identifier
