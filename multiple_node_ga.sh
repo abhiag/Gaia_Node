@@ -50,18 +50,20 @@ fi
 echo "🔑 Granting permissions to the extracted folder..."
 chmod -R 777 multipleforlinux
 
-# Check if the directory exists
-if [ -d "multipleforlinux" ]; then
-  echo "📂 Navigating to the extracted directory..."
-  cd multipleforlinux
-else
-  echo "Error: multipleforlinux directory not found!"
-  exit 1
-fi
+# Navigate to the extracted directory
+echo "📂 Navigating to the extracted directory..."
+cd multipleforlinux
 
 # Grant executable permissions to CLI and Node binaries
-echo "🔧 Setting executable permissions..."
+echo "🔧 Setting executable permissions 1 ..."
 chmod +x ./multiple-cli
+
+# Navigate to the extracted directory
+echo "📂 Navigating to the extracted directory..."
+cd multipleforlinux
+
+# Grant executable permissions to CLI and Node binaries
+echo "🔧 Setting executable permissions 2 ..."
 chmod +x ./multiple-node
 
 # Add the directory to PATH
@@ -72,18 +74,13 @@ echo "PATH=\$PATH:/root/multipleforlinux" | sudo tee -a /etc/profile
 echo "🔄 Sourcing /etc/profile to apply PATH changes..."
 source /etc/profile
 
+# Navigate to the extracted directory
+echo "📂 Navigating to the extracted directory..."
+cd multipleforlinux
+
 # Start the Multiple node in the background
 echo "🚀 Starting the Multiple node..."
 nohup ./multiple-node > output.log 2>&1 &
-
-# Prompt the user for the identifier
-read -p "Enter your identifier (XXXXXXXX): " identifier
-
-# Prompt the user for the PIN
-read -p "Enter your PIN (XXXXXX): " pin
-
-# Execute the bind command with the provided inputs
-multiple-cli bind --bandwidth-download 100000 --identifier "$identifier" --pin "$pin" --storage 100000000 --bandwidth-upload 100000
 
 echo "==========================================================="
 echo "🎉 Installation and configuration of Multiple Node completed!"
