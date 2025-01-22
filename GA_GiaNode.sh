@@ -64,25 +64,12 @@ echo "Status: $status"
 
 # Add GaiaNet to PATH
 echo "🔗 Adding GaiaNet to system PATH..."
-echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc
-source ~/.bashrc
+echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
 status=$?
 if [ $status -eq 0 ]; then
     echo "✅ GaiaNet added to PATH successfully!"
 else
     echo "❌ Error: Failed to add GaiaNet to PATH!"
-    exit 1
-fi
-echo "Status: $status"
-
-# Source the updated bashrc
-echo "🔄 Sourcing .bashrc to apply environment variables..."
-source ~/.bashrc
-status=$?
-if [ $status -eq 0 ]; then
-    echo "✅ Successfully sourced .bashrc!"
-else
-    echo "❌ Error: Failed to source .bashrc!"
     exit 1
 fi
 echo "Status: $status"
