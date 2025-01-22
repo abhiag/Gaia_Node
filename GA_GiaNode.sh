@@ -70,7 +70,8 @@ echo "Status: $status"
 
 # Add GaiaNet to PATH
 echo "🔗 Adding GaiaNet to system PATH..."
-echo "export PATH=\$PATH:/usr/local/bin" >> ~/.bashrc
+export PATH=\$PATH:/usr/local/bin" >> ~/.bashrc
+source ~/.bashrc
 status=$?
 if [ $status -eq 0 ]; then
     echo "✅ GaiaNet added to PATH successfully!"
