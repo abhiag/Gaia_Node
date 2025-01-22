@@ -52,13 +52,13 @@ echo "🚀 Starting the Multiple node..."
 nohup ~/multipleforlinux/multiple-node > output.log 2>&1 &
 
 # Prompt the user for the identifier
-read -p "Enter your identifier: " identifier
+read -p "Enter your identifier (XXXXXXXX): " identifier
 
 # Prompt the user for the PIN
-read -p "Enter your PIN: " pin
+read -p "Enter your PIN (XXXXXX): " pin
 
-# Execute the bind command with the user inputs
-./multiple-cli bind --bandwidth-download 100000 --identifier "$identifier" --pin "$pin" --storage 100000000 --bandwidth-upload 100000
+# Execute the bind command with the provided inputs
+multiple-cli bind --bandwidth-download 100000 --identifier "$identifier" --pin "$pin" --storage 100000000 --bandwidth-upload 100000
 
 echo "==========================================================="
 echo "🎉 Installation and configuration of Multiple Node completed!"
