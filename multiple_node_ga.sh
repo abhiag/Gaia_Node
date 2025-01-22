@@ -86,6 +86,7 @@ echo "Status: $?"  # Shows the exit status of nohup command
 # Identivier Execution
 echo "🚀 Identivier Execution Multiple node..."
 curl -O https://raw.githubusercontent.com/abhiag/Gaia_Node/main/identifier.sh && chmod +x identifier.sh && ./identifier.sh
+echo "Status: $?"  # Shows the exit status of Identivier Execution
 
 echo "==========================================================="
 echo "🎉 Installation and configuration of Multiple Node completed!"
