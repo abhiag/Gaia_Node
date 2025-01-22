@@ -29,7 +29,6 @@ printf "\n\n"
 # 📢 Stay updated:                                                                      
 #     • Follow us on Telegram: https://t.me/GaCryptOfficial                             
 #     • Follow us on X: https://x.com/GACryptoO                                         
-
 ##########################################################################################
 
 # Green color for advertisement
@@ -55,7 +54,7 @@ echo ""
 
 # Basic packages
 echo "install Common Required Packages"
-sudo apt update -y && sudo apt full-upgrade -y && sudo apt-get install libgomp1 -y
+sudo apt update -y && sudo apt-get install libgomp1 -y
 
 # Install GaiaNet node
 echo "📥 Installing GaiaNet node..."
