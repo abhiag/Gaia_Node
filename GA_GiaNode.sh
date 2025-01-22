@@ -33,7 +33,7 @@ curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/
 
 # Source the updated bashrc
 echo "🔄 Sourcing .bashrc to apply environment variables..."
-source /root/.bashrc
+source ~/.bashrc
 
 # Initialize GaiaNet node with the specified configuration
 echo "⚙️  Initializing GaiaNet node with the latest configuration..."
