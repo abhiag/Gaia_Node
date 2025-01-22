@@ -17,5 +17,5 @@ if ! command -v multiple-cli &> /dev/null; then
 fi
 
 # Execute the bind command with the provided inputs
-echo "Executing: multiple-cli bind --bandwidth-download 100000 --identifier $identifier --pin $pin --storage 100000000 --bandwidth-upload 100000"
-multiple-cli bind --bandwidth-download 100000 --identifier "$identifier" --pin "$pin" --storage 100000000 --bandwidth-upload 100000
+echo "Executing: multiple-cli bind --bandwidth-download 100000 --identifier $identifier --pin $pin --storage 700000000 --bandwidth-upload 100000"
+multiple-cli bind --bandwidth-download 100000 --identifier "$identifier" --pin "$pin" --storage 700000000 --bandwidth-upload 100000
