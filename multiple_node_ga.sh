@@ -60,12 +60,12 @@ echo "Status: $?"  # Shows the exit status of cd command
 
 # Grant executable permissions to CLI and Node binaries
 echo "🔧 Setting executable permissions 1 ..."
-chmod +x ./multiple-cli
+chmod +x ~/multipleforlinux/multiple-cli
 echo "Status: $?"  # Shows the exit status of chmod command for multiple-cli
 
 # Grant executable permissions to CLI and Node binaries
 echo "🔧 Setting executable permissions 2 ..."
-chmod +x ./multiple-node
+chmod +x ~/multipleforlinux/multiple-node
 echo "Status: $?"  # Shows the exit status of chmod command for multiple-node
 
 # Add the directory to PATH
@@ -80,22 +80,12 @@ echo "Status: $?"  # Shows the exit status of source command
 
 # Start the Multiple node in the background
 echo "🚀 Starting the Multiple node..."
-nohup ./multiple-node > output.log 2>&1 &
+nohup ~/multipleforlinux/multiple-node > output.log 2>&1 &
 echo "Status: $?"  # Shows the exit status of nohup command
 
-# Prompt the user for the identifier
-read -p "Enter your identifier (XXXXXXXX): " identifier
-
-# Prompt the user for the PIN
-read -p "Enter your PIN (XXXXXX): " pin
-
-# Print the values for debugging
-echo "Identifier: $identifier"
-echo "PIN: $pin"
-
-# Execute the bind command with the provided inputs
-echo "~/multipleforlinux/Executing: multiple-cli bind --bandwidth-download 100000 --identifier $identifier --pin $pin --storage 70000000 --bandwidth-upload 100000"
-~/multipleforlinux/multiple-cli bind --bandwidth-download 100000 --identifier "$identifier" --pin "$pin" --storage 70000000 --bandwidth-upload 100000
+# Identivier Execution
+echo "🚀 Identivier Execution Multiple node..."
+curl -O https://raw.githubusercontent.com/abhiag/Gaia_Node/main/identifier.sh && chmod +x identifier.sh && ./identifier.sh
 
 echo "==========================================================="
 echo "🎉 Installation and configuration of Multiple Node completed!"
