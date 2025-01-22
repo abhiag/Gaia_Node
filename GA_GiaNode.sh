@@ -76,9 +76,57 @@ else
 fi
 echo "Status: $status"
 
+# Add GaiaNet to PATH
+echo "🔗 Adding GaiaNet to system PATH..."
+echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
+status=$?
+if [ $status -eq 0 ]; then
+    echo "✅ GaiaNet added to PATH successfully!"
+else
+    echo "❌ Error: Failed to add GaiaNet to PATH!"
+    exit 1
+fi
+echo "Status: $status"
+
+# Add GaiaNet to PATH
+echo "🔗 Adding GaiaNet to system PATH..."
+echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
+status=$?
+if [ $status -eq 0 ]; then
+    echo "✅ GaiaNet added to PATH successfully!"
+else
+    echo "❌ Error: Failed to add GaiaNet to PATH!"
+    exit 1
+fi
+echo "Status: $status"
+
+# Add GaiaNet to PATH
+echo "🔗 Adding GaiaNet to system PATH..."
+echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
+status=$?
+if [ $status -eq 0 ]; then
+    echo "✅ GaiaNet added to PATH successfully!"
+else
+    echo "❌ Error: Failed to add GaiaNet to PATH!"
+    exit 1
+fi
+echo "Status: $status"
+
+# Add GaiaNet to PATH
+echo "🔗 Adding GaiaNet to system PATH..."
+echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
+status=$?
+if [ $status -eq 0 ]; then
+    echo "✅ GaiaNet added to PATH successfully!"
+else
+    echo "❌ Error: Failed to add GaiaNet to PATH!"
+    exit 1
+fi
+echo "Status: $status"
+
 # Initialize GaiaNet node with the specified configuration
 echo "⚙️ Initializing GaiaNet node with the latest configuration..."
-echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc && gaianet init --config https://raw.githubusercontent.com/GaiaNet-AI/node-configs/refs/heads/main/llama-3.2-3b-instruct/config.json
+gaianet init --config https://raw.githubusercontent.com/GaiaNet-AI/node-configs/refs/heads/main/llama-3.2-3b-instruct/config.json
 status=$?
 if [ $status -eq 0 ]; then
     echo "✅ GaiaNet node initialized successfully!"
