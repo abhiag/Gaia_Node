@@ -11,7 +11,7 @@ echo "Identifier: $identifier"
 echo "PIN: $pin"
 
 # Debug: Check if the multiple-cli command exists
-if ! command -v multiple-cli &> /dev/null; then
+if ! command -v ./multiple-cli &> /dev/null; then
     echo "Error: multiple-cli command not found!"
     exit 1
 fi
