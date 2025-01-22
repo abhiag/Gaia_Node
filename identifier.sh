@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Prompt the user for the identifier
 read -p "Enter your identifier (XXXXXXXX): " identifier
 
@@ -11,5 +9,5 @@ echo "Identifier: $identifier"
 echo "PIN: $pin"
 
 # Execute the bind command with the provided inputs
-echo "~/multipleforlinux/Executing: multiple-cli bind --bandwidth-download 100000 --identifier $identifier --pin $pin --storage 700000000 --bandwidth-upload 100000"
-~/multipleforlinux/multiple-cli bind --bandwidth-download 100000 --identifier "$identifier" --pin "$pin" --storage 700000000 --bandwidth-upload 100000
+echo "~/multipleforlinux/Executing: multiple-cli bind --bandwidth-download 100000 --identifier $identifier --pin $pin --storage 70000000 --bandwidth-upload 100000"
+~/multipleforlinux/multiple-cli bind --bandwidth-download 100000 --identifier "$identifier" --pin "$pin" --storage 70000000 --bandwidth-upload 100000
