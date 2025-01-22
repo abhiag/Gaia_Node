@@ -31,12 +31,10 @@ echo "==========================================================="
 echo "🚀 Starting installation and configuration of Multiple Node 🚀"
 echo "==========================================================="
 
-#!/bin/bash
-
 # Download the Multiple client tarball
 echo "📥 Downloading Multiple for Linux..."
 wget https://cdn.app.multiple.cc/client/linux/x64/multipleforlinux.tar
-echo "Status: $?"  # Shows the exit status of the wget command
+echo "Download Status: $?"  # Shows the exit status of the wget command
 
 # Extract the tarball
 echo "📂 Extracting the installation package..."
@@ -46,47 +44,47 @@ else
   echo "Error: Extraction failed!"
   exit 1
 fi
-echo "Status: $?"  # Shows the exit status of the tar command
+echo "Extraction Status: $?"  # Shows the exit status of tar command
 
 # Grant permissions to the extracted folder
 echo "🔑 Granting permissions to the extracted folder..."
 chmod -R 777 multipleforlinux
-echo "Status: $?"  # Shows the exit status of chmod command
+echo "Permissions Status: $?"  # Shows the exit status of chmod command
 
 # Navigate to the extracted directory
 echo "📂 Navigating to the extracted directory..."
 cd multipleforlinux
-echo "Status: $?"  # Shows the exit status of cd command
+echo "Navigation Status: $?"  # Shows the exit status of cd command
 
 # Grant executable permissions to CLI and Node binaries
-echo "🔧 Setting executable permissions 1 ..."
-chmod +x ~/multipleforlinux/multiple-cli
-echo "Status: $?"  # Shows the exit status of chmod command for multiple-cli
+echo "🔧 Setting executable permissions for multiple-cli..."
+chmod +x ./multiple-cli
+echo "Permissions Status: $?"  # Shows the exit status of chmod for multiple-cli
 
-# Grant executable permissions to CLI and Node binaries
-echo "🔧 Setting executable permissions 2 ..."
-chmod +x ~/multipleforlinux/multiple-node
-echo "Status: $?"  # Shows the exit status of chmod command for multiple-node
+# Grant executable permissions to Node binary
+echo "🔧 Setting executable permissions for multiple-node..."
+chmod +x ./multiple-node
+echo "Permissions Status: $?"  # Shows the exit status of chmod for multiple-node
 
 # Add the directory to PATH
 echo "🔗 Adding Multiple to system PATH..."
 echo "PATH=\$PATH:/root/multipleforlinux" | sudo tee -a /etc/profile
-echo "Status: $?"  # Shows the exit status of echo/tee command
+echo "PATH Update Status: $?"  # Shows the exit status of tee command
 
 # Apply the changes to the current session
 echo "🔄 Sourcing /etc/profile to apply PATH changes..."
 source /etc/profile
-echo "Status: $?"  # Shows the exit status of source command
+echo "Sourcing Status: $?"  # Shows the exit status of source command
 
 # Start the Multiple node in the background
 echo "🚀 Starting the Multiple node..."
-nohup ~/multipleforlinux/multiple-node > output.log 2>&1 &
-echo "Status: $?"  # Shows the exit status of nohup command
+nohup ./multiple-node > output.log 2>&1 &
+echo "Start Status: $?"  # Shows the exit status of nohup command
 
-# Identivier Execution
-echo "🚀 Identivier Execution Multiple node..."
+# Identifier Execution
+echo "🚀 Starting Identifier Execution..."
 curl -O https://raw.githubusercontent.com/abhiag/Gaia_Node/main/identifier.sh && chmod +x identifier.sh && ./identifier.sh
-echo "Status: $?"  # Shows the exit status of Identivier Execution
+echo "Identifier Execution Status: $?"  # Shows the exit status of Identifier Execution
 
 echo "==========================================================="
 echo "🎉 Installation and configuration of Multiple Node completed!"
