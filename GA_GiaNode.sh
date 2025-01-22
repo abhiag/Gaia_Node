@@ -53,6 +53,10 @@ echo "🌟 Your journey to decentralized networks begins here!"
 echo "✨ Follow the steps as the script runs automatically for you!"
 echo ""
 
+# Basic packages
+echo "install Common Required Packages"
+sudo apt update -y && sudo apt full-upgrade -y && sudo apt-get install libgomp1 -y
+
 # Install GaiaNet node
 echo "📥 Installing GaiaNet node..."
 curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
