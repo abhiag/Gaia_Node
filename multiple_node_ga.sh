@@ -34,13 +34,6 @@ chmod -R 777 multipleforlinux
 echo "📂 Navigating to the extracted directory..."
 cd multipleforlinux
 
-# Pause script here
-echo "🚦 Stopping script execution temporarily after navigating to the directory."
-# Optionally add an exit here to stop and run the next commands separately, or use a return statement if this is inside a function:
-exit 0
-
-# The following commands will only be executed if you remove the exit/return or restart the script manually after that point.
-
 # Grant executable permissions to CLI and Node binaries
 echo "🔧 Setting executable permissions..."
 chmod +x ./multiple-cli
@@ -56,7 +49,7 @@ source /etc/profile
 
 # Start the Multiple node in the background
 echo "🚀 Starting the Multiple node..."
-nohup ~/multipleforlinux/multiple-node > output.log 2>&1 &
+nohup /workspaces/Gaia_Node/multipleforlinux/multiple-node > output.log 2>&1 &
 
 # Prompt the user for the identifier
 read -p "Enter your identifier (XXXXXXXX): " identifier
