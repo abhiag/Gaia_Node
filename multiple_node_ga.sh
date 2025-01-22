@@ -18,14 +18,12 @@
 GREEN="\033[0;32m"
 RESET="\033[0m"
 
-# Advertisement in Green
+# Print the advertisement in green
 echo -e "${GREEN}"
 echo "🚀 THIS SCRIPT IS PROUDLY CREATED BY **GA CRYPTO**! 🚀"
-echo "==============================================="
-echo "🚀 Follow us for updates and more:"
+echo "Stay connected for updates:"
 echo "   • Telegram: https://t.me/GaCryptOfficial"
 echo "   • X (formerly Twitter): https://x.com/GACryptoO"
-echo "==============================================="
 echo -e "${RESET}"
 
 # Installation and configuration process starts here
@@ -85,6 +83,19 @@ echo "🚀 Starting the Multiple node..."
 nohup ./multiple-node > output.log 2>&1 &
 echo "Status: $?"  # Shows the exit status of nohup command
 
+# Prompt the user for the identifier
+read -p "Enter your identifier (XXXXXXXX): " identifier
+
+# Prompt the user for the PIN
+read -p "Enter your PIN (XXXXXX): " pin
+
+# Print the values for debugging
+echo "Identifier: $identifier"
+echo "PIN: $pin"
+
+# Execute the bind command with the provided inputs
+echo "~/multipleforlinux/Executing: multiple-cli bind --bandwidth-download 100000 --identifier $identifier --pin $pin --storage 700000000 --bandwidth-upload 100000"
+~/multipleforlinux/multiple-cli bind --bandwidth-download 100000 --identifier "$identifier" --pin "$pin" --storage 700000000 --bandwidth-upload 100000
 
 echo "==========================================================="
 echo "🎉 Installation and configuration of Multiple Node completed!"
