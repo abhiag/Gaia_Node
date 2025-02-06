@@ -18,8 +18,8 @@ send_request() {
 EOF
         )
 
-        # Send the request using curl
-        response=$(curl -s -w "%{http_code}" -X POST "$api_url" \
+        # Send the request using curl and capture both the response and status code
+        response=$(curl -s -w "\n%{http_code}" -X POST "$api_url" \
             -H "Authorization: Bearer $api_key" \
             -H "Accept: application/json" \
             -H "Content-Type: application/json" \
@@ -33,8 +33,15 @@ EOF
             # Check if the response is valid JSON
             echo "$body" | jq . > /dev/null 2>&1
             if [ $? -eq 0 ]; then
+                # Print the question and response content
                 echo "✅ [SUCCESS] API: $api_url | Message: '$message'"
-                echo "$body"
+
+                # Extract the response message from the JSON
+                response_message=$(echo "$body" | jq -r '.choices[0].message.content')
+                
+                # Print both the question and the response
+                echo "Question: $message"
+                echo "Response: $response_message"
                 break  # Exit loop if request was successful
             else
                 echo "⚠️ [ERROR] Invalid JSON response! API: $api_url"
@@ -47,19 +54,41 @@ EOF
     done
 }
 
-# Read the messages from message.txt
-user_messages=()
-while IFS= read -r msg; do
-    if [[ -n "$msg" ]]; then
-        user_messages+=("$msg")
-    fi
-done < message.txt
-
-# Exit if there are no messages
-if [ ${#user_messages[@]} -eq 0 ]; then
-    echo "Error: No messages in message.txt!"
-    exit 1
-fi
+# Define a list of predefined math-related messages
+user_messages=(
+    "What is 1 + 1"
+    "What is 2 + 2"
+    "What is 3 + 1"
+    "What is 4 + 2"
+    "What is 5 + 3"
+    "What is 6 + 1"
+    "What is 7 + 2"
+    "What is 8 + 3"
+    "What is 9 + 1"
+    "What is 10 + 5"
+    "What is 7 + 5"
+    "What is 9 + 6"
+    "What is 11 + 2"
+    "What is 12 + 3"
+    "What is 15 + 4"
+    "What is 18 + 2"
+    "What is 2 - 1"
+    "What is 4 - 2"
+    "What is 5 - 3"
+    "What is 6 - 2"
+    "What is 7 - 5"
+    "What is 8 - 4"
+    "What is 9 - 6"
+    "What is 10 - 3"
+    "What is 12 - 7"
+    "What is 15 - 5"
+    "What is 13 - 6"
+    "What is 14 - 8"
+    "What is 16 - 9"
+    "What is 20 - 4"
+    "What is 22 - 10"
+    "What is 25 - 5"
+)
 
 # Ask the user to input API Key and Domain URL
 echo -n "Enter your API Key: "
@@ -85,23 +114,15 @@ fi
 # Function to run the thread
 start_thread() {
     while true; do
-        # Select a random message from user_messages
+        # Pick a random message from the predefined list
         random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
-        
-        # Debug: Print the selected random message
-        echo "Selected Message: $random_message"
-        
-        # Send the request
         send_request "$random_message" "$api_key" "$api_url"
-
-        # Add a small delay to prevent hitting rate limits
-        sleep 1  # You can adjust this value as needed
     done
 }
 
 # Start the threads
 for ((i = 0; i < num_threads; i++)); do
-    start_thread &  # Run the thread in the background
+    start_thread &
 done
 
 # Wait for all threads to finish (this will run indefinitely)
