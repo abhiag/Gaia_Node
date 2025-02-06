@@ -35,8 +35,12 @@ EOF
             if [ $? -eq 0 ]; then
                 # Print the response content
                 echo "✅ [SUCCESS] API: $api_url | Message: '$message'"
-                # Extract specific data from the response using jq (example)
+                
+                # Extract the response message from the JSON
                 response_message=$(echo "$body" | jq -r '.choices[0].message.content')
+                
+                # Print both the question and the response
+                echo "Question: $message"
                 echo "Response: $response_message"
                 break  # Exit loop if request was successful
             else
