@@ -18,8 +18,8 @@ send_request() {
 EOF
         )
 
-        # Send the request using curl
-        response=$(curl -s -w "%{http_code}" -X POST "$api_url" \
+        # Send the request using curl and capture both the response and status code
+        response=$(curl -s -w "\n%{http_code}" -X POST "$api_url" \
             -H "Authorization: Bearer $api_key" \
             -H "Accept: application/json" \
             -H "Content-Type: application/json" \
@@ -33,9 +33,9 @@ EOF
             # Check if the response is valid JSON
             echo "$body" | jq . > /dev/null 2>&1
             if [ $? -eq 0 ]; then
-                # Print the response content
+                # Print the question and response content
                 echo "✅ [SUCCESS] API: $api_url | Message: '$message'"
-                
+
                 # Extract the response message from the JSON
                 response_message=$(echo "$body" | jq -r '.choices[0].message.content')
                 
