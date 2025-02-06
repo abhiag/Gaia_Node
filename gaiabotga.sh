@@ -85,14 +85,23 @@ fi
 # Function to run the thread
 start_thread() {
     while true; do
+        # Select a random message from user_messages
         random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
+        
+        # Debug: Print the selected random message
+        echo "Selected Message: $random_message"
+        
+        # Send the request
         send_request "$random_message" "$api_key" "$api_url"
+
+        # Add a small delay to prevent hitting rate limits
+        sleep 1  # You can adjust this value as needed
     done
 }
 
 # Start the threads
 for ((i = 0; i < num_threads; i++)); do
-    start_thread &
+    start_thread &  # Run the thread in the background
 done
 
 # Wait for all threads to finish (this will run indefinitely)
