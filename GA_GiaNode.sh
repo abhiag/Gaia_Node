@@ -163,6 +163,7 @@ echo "Status: $status"
 
 # Start the GaiaNet node
 echo "🚀 Starting GaiaNet node..."
+gaianet config --domain gaia.domains
 gaianet start
 status=$?
 if [ $status -eq 0 ]; then
