@@ -33,8 +33,11 @@ EOF
             # Check if the response is valid JSON
             echo "$body" | jq . > /dev/null 2>&1
             if [ $? -eq 0 ]; then
+                # Print the response content
                 echo "✅ [SUCCESS] API: $api_url | Message: '$message'"
-                echo "$body"
+                # Extract specific data from the response using jq (example)
+                response_message=$(echo "$body" | jq -r '.choices[0].message.content')
+                echo "Response: $response_message"
                 break  # Exit loop if request was successful
             else
                 echo "⚠️ [ERROR] Invalid JSON response! API: $api_url"
