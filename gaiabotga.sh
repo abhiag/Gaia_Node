@@ -58,10 +58,11 @@ if [ ${#user_messages[@]} -eq 0 ]; then
     exit 1
 fi
 
-# Get API details
-read -s -p "Enter your API Key: " api_key
-echo
-read -p "Enter the Domain URL: " api_url
+# Ask the user to input API Key and Domain URL
+echo -n "Enter your API Key: "
+read api_key
+echo -n "Enter the Domain URL: "
+read api_url
 
 if [[ -z "$api_key" || -z "$api_url" ]]; then
     echo "Error: Both API Key and Domain URL are required!"
