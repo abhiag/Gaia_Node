@@ -1,18 +1,13 @@
 #!/bin/bash
 
-# Trap to stop execution on Ctrl+C
-trap "echo 'Stopping all threads...'; exit" SIGINT SIGTERM
-
-# Function to send an API request
+# Function to handle the API request
 send_request() {
     local message="$1"
     local api_key="$2"
     local api_url="$3"
 
-    attempt=0
-    max_attempts=5
-
-    while (( attempt < max_attempts )); do
+    while true; do
+        # Prepare the JSON payload
         json_data=$(cat <<EOF
 {
     "messages": [
@@ -23,36 +18,44 @@ send_request() {
 EOF
         )
 
+        # Send the request using curl
         response=$(curl -s -w "%{http_code}" -X POST "$api_url" \
             -H "Authorization: Bearer $api_key" \
             -H "Accept: application/json" \
             -H "Content-Type: application/json" \
             -d "$json_data")
 
+        # Extract the HTTP status code from the response
         http_status=$(echo "$response" | tail -n 1)
         body=$(echo "$response" | head -n -1)
 
         if [[ "$http_status" -eq 200 ]]; then
-            if echo "$body" | jq . > /dev/null 2>&1; then
-                echo "✅ [SUCCESS] Message: '$message'"
+            # Check if the response is valid JSON
+            echo "$body" | jq . > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                echo "✅ [SUCCESS] API: $api_url | Message: '$message'"
                 echo "$body"
-                return 0
+                break  # Exit loop if request was successful
             else
-                echo "⚠️ [ERROR] Invalid JSON response!"
+                echo "⚠️ [ERROR] Invalid JSON response! API: $api_url"
+                echo "Response Text: $body"
             fi
         else
-            echo "⚠️ [ERROR] API Status: $http_status | Retrying in $((2**attempt))s..."
-            sleep $((2**attempt))
+            echo "⚠️ [ERROR] API: $api_url | Status: $http_status | Retrying in 2s..."
+            sleep 2
         fi
-        ((attempt++))
     done
-    echo "❌ [FAILED] Max retries reached for message: '$message'"
-    return 1
 }
 
-# Read messages from message.txt
-mapfile -t user_messages < <(grep . message.txt)
+# Read the messages from message.txt
+user_messages=()
+while IFS= read -r msg; do
+    if [[ -n "$msg" ]]; then
+        user_messages+=("$msg")
+    fi
+done < message.txt
 
+# Exit if there are no messages
 if [ ${#user_messages[@]} -eq 0 ]; then
     echo "Error: No messages in message.txt!"
     exit 1
@@ -64,33 +67,35 @@ read api_key
 echo -n "Enter the Domain URL: "
 read api_url
 
-if [[ -z "$api_key" || -z "$api_url" ]]; then
+# Exit if the API Key or URL is empty
+if [ -z "$api_key" ] || [ -z "$api_url" ]; then
     echo "Error: Both API Key and Domain URL are required!"
     exit 1
 fi
 
-# Get number of threads and limit per thread
-read -p "Enter number of threads: " num_threads
-read -p "Enter max API calls per thread: " max_calls
+# Ask the user how many threads to use
+echo -n "Enter the number of threads you want to use: "
+read num_threads
 
-if ! [[ "$num_threads" =~ ^[0-9]+$ ]] || [ "$num_threads" -lt 1 ] || ! [[ "$max_calls" =~ ^[0-9]+$ ]]; then
-    echo "Invalid input. Please enter integers greater than 0."
+if ! [[ "$num_threads" =~ ^[0-9]+$ ]] || [ "$num_threads" -lt 1 ]; then
+    echo "Invalid input. Please enter an integer greater than 0."
     exit 1
 fi
 
-# Function to start a thread
+# Function to run the thread
 start_thread() {
-    for ((i = 0; i < max_calls; i++)); do
-        random_message=$(shuf -n 1 message.txt)
+    while true; do
+        random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
         send_request "$random_message" "$api_key" "$api_url"
-        sleep 1
     done
 }
 
-# Start threads
+# Start the threads
 for ((i = 0; i < num_threads; i++)); do
     start_thread &
 done
 
+# Wait for all threads to finish (this will run indefinitely)
 wait
-echo "✅ All requests completed."
+
+echo "All requests have been processed."  # This will never be reached because of the infinite loop
