@@ -98,17 +98,8 @@ if [ -z "$api_key" ] || [ -z "$api_url" ]; then
     exit 1
 fi
 
-# Ask the user how many threads to use
-echo -n "Enter the number of threads you want to use: "
-read num_threads
-
-if ! [[ "$num_threads" =~ ^[0-9]+$ ]] || [ "$num_threads" -lt 1 ]; then
-    echo "Invalid input. Please enter an integer greater than 0."
-    exit 1
-fi
-
-# Function to run the thread
-start_thread() {
+# Function to run the process in a single-threaded mode
+start_process() {
     while true; do
         # Pick a random message from the predefined list
         random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
@@ -116,12 +107,7 @@ start_thread() {
     done
 }
 
-# Start the threads
-for ((i = 0; i < num_threads; i++)); do
-    start_thread &
-done
-
-# Wait for all threads to finish (this will run indefinitely)
-wait
+# Start only one process
+start_process
 
 echo "All requests have been processed."  # This will never be reached because of the infinite loop
