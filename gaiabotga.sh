@@ -40,11 +40,11 @@ EOF
             echo "Response: $response_message"
 
             # Wait for 3 minutes before sending the next request
-            echo "⏳ Waiting for 4 minutes before the next request..."
-            sleep 240  # 240 seconds = 4 minutes
+            echo "⏳ Waiting for 2 minutes before the next request..."
+            sleep 120  # 180 seconds = 2 minutes
             break  # Exit loop if request was successful
         else
-            echo "⚠️ [ERROR] API: $api_url | Status: $http_status | Retrying in 2s..."
+            echo "⚠️ [ERROR] API: $api_url | Status: $http_status | Retrying in 3 minutes..."
             sleep 180  # 180 seconds = 3 minutes
         fi
     done
@@ -62,10 +62,6 @@ user_messages=(
     "What is 8 + 3"
     "What is 9 + 1"
     "What is 10 + 5"
-    "If you have 2 apples and get 2 more, how many do you have"
-    "If you have 3 candies and get 4 more, how many do you have"
-    "If you have 5 balloons and get 3 more, how many do you have"
-    "If you have 6 cookies and get 2 more, how many do you have"
     "What is 7 + 5"
     "What is 9 + 6"
     "What is 11 + 2"
@@ -82,10 +78,6 @@ user_messages=(
     "What is 10 - 3"
     "What is 12 - 7"
     "What is 15 - 5"
-    "If you have 5 apples and eat 2, how many are left"
-    "If you have 10 chocolates and give 4 to a friend, how many do you have left"
-    "If you have 7 toys and lose 3, how many do you have now"
-    "If you have 9 stickers and give 6 away, how many are left"
     "What is 13 - 6"
     "What is 14 - 8"
     "What is 16 - 9"
