@@ -30,23 +30,19 @@ EOF
         body=$(echo "$response" | head -n -1)
 
         if [[ "$http_status" -eq 200 ]]; then
-            # Check if the response is valid JSON
-            echo "$body" | jq . > /dev/null 2>&1
-            if [ $? -eq 0 ]; then
-                # Print the question and response content
-                echo "✅ [SUCCESS] API: $api_url | Message: '$message'"
+            echo "✅ [SUCCESS] API: $api_url | Message: '$message'"
+            
+            # Extract the response message from the JSON
+            response_message=$(echo "$body" | jq -r '.choices[0].message.content')
 
-                # Extract the response message from the JSON
-                response_message=$(echo "$body" | jq -r '.choices[0].message.content')
-                
-                # Print both the question and the response
-                echo "Question: $message"
-                echo "Response: $response_message"
-                break  # Exit loop if request was successful
-            else
-                echo "⚠️ [ERROR] Invalid JSON response! API: $api_url"
-                echo "Response Text: $body"
-            fi
+            # Print both the question and the response
+            echo "Question: $message"
+            echo "Response: $response_message"
+
+            # Wait for 3 minutes before sending the next request
+            echo "⏳ Waiting for 4 minutes before the next request..."
+            sleep 240  # 240 seconds = 4 minutes
+            break  # Exit loop if request was successful
         else
             echo "⚠️ [ERROR] API: $api_url | Status: $http_status | Retrying in 2s..."
             sleep 2
@@ -54,7 +50,7 @@ EOF
     done
 }
 
-# Define a list of predefined math-related messages
+# Define a list of math-related questions for kids
 user_messages=(
     "What is 1 + 1"
     "What is 2 + 2"
@@ -66,6 +62,10 @@ user_messages=(
     "What is 8 + 3"
     "What is 9 + 1"
     "What is 10 + 5"
+    "If you have 2 apples and get 2 more, how many do you have"
+    "If you have 3 candies and get 4 more, how many do you have"
+    "If you have 5 balloons and get 3 more, how many do you have"
+    "If you have 6 cookies and get 2 more, how many do you have"
     "What is 7 + 5"
     "What is 9 + 6"
     "What is 11 + 2"
@@ -82,6 +82,10 @@ user_messages=(
     "What is 10 - 3"
     "What is 12 - 7"
     "What is 15 - 5"
+    "If you have 5 apples and eat 2, how many are left"
+    "If you have 10 chocolates and give 4 to a friend, how many do you have left"
+    "If you have 7 toys and lose 3, how many do you have now"
+    "If you have 9 stickers and give 6 away, how many are left"
     "What is 13 - 6"
     "What is 14 - 8"
     "What is 16 - 9"
