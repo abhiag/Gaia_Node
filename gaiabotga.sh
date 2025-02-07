@@ -45,7 +45,7 @@ EOF
             break  # Exit loop if request was successful
         else
             echo "⚠️ [ERROR] API: $api_url | Status: $http_status | Retrying in 2s..."
-            sleep 2
+            sleep 180  # 180 seconds = 3 minutes
         fi
     done
 }
