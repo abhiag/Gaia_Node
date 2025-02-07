@@ -1,10 +1,12 @@
 #!/bin/bash
 
+# API Configuration
+API_URL="https://gadao.gaia.domains/v1/chat/completions"
+
 # Function to handle the API request
 send_request() {
     local message="$1"
     local api_key="$2"
-    local api_url="https://gadao.gaia.domains/v1/chat/completions"
 
     while true; do
         # Prepare the JSON payload
@@ -19,7 +21,7 @@ EOF
         )
 
         # Send the request using curl and capture both the response and status code
-        response=$(curl -s -w "\n%{http_code}" -X POST "$api_url" \
+        response=$(curl -s -w "\n%{http_code}" -X POST "$API_URL" \
             -H "Authorization: Bearer $api_key" \
             -H "Accept: application/json" \
             -H "Content-Type: application/json" \
@@ -30,7 +32,7 @@ EOF
         body=$(echo "$response" | head -n -1)
 
         if [[ "$http_status" -eq 200 ]]; then
-            echo "✅ [SUCCESS] API: $api_url | Message: '$message'"
+            echo "✅ [SUCCESS] API: $API_URL | Message: '$message'"
             
             # Extract the response message from the JSON
             response_message=$(echo "$body" | jq -r '.choices[0].message.content')
@@ -41,11 +43,15 @@ EOF
 
             # Wait for 3 minutes before sending the next request
             echo "⏳ Waiting for 2 minutes before the next request..."
-            sleep 120  # 180 seconds = 2 minutes
-            break  # Exit loop if request was successful
+            sleep 120  # 120 seconds = 2 minutes
         else
-            echo "⚠️ [ERROR] API: $api_url | Status: $http_status | Retrying in 3 minutes..."
-            sleep 180  # 180 seconds = 3 minutes
+            echo "⚠️ [ERROR] API: $API_URL | Status: $http_status | Retrying in a random time between 2-5 minutes..."
+
+            # Generate a random delay between 120 (2 min) and 300 (5 min) seconds
+            random_delay=$((RANDOM % 180 + 120))
+
+            echo "⏳ Waiting for $random_delay seconds before retrying..."
+            sleep $random_delay
         fi
     done
 }
@@ -96,8 +102,8 @@ if [ -z "$api_key" ]; then
     exit 1
 fi
 
-# Function to run the process in a single-threaded mode
-start_process() {
+# Function to run the thread (only one thread)
+start_thread() {
     while true; do
         # Pick a random message from the predefined list
         random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
@@ -105,7 +111,10 @@ start_process() {
     done
 }
 
-# Start only one process
-start_process
+# Graceful exit handling (SIGINT, SIGTERM)
+trap "echo -e '\n🛑 Process terminated. Exiting gracefully...'; exit 0" SIGINT SIGTERM
+
+# Start the single thread
+start_thread
 
 echo "All requests have been processed."  # This will never be reached because of the infinite loop
