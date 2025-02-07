@@ -4,7 +4,7 @@
 send_request() {
     local message="$1"
     local api_key="$2"
-    local api_url="$3"
+    local api_url="https://gadao.gaia.domains/v1/chat/completions"
 
     while true; do
         # Prepare the JSON payload
@@ -86,15 +86,13 @@ user_messages=(
     "What is 25 - 5"
 )
 
-# Ask the user to input API Key and Domain URL
+# Ask the user to input API Key
 echo -n "Enter your API Key: "
 read api_key
-echo -n "Enter the Domain URL: "
-read api_url
 
-# Exit if the API Key or URL is empty
-if [ -z "$api_key" ] || [ -z "$api_url" ]; then
-    echo "Error: Both API Key and Domain URL are required!"
+# Exit if the API Key is empty
+if [ -z "$api_key" ]; then
+    echo "Error: API Key is required!"
     exit 1
 fi
 
@@ -103,7 +101,7 @@ start_process() {
     while true; do
         # Pick a random message from the predefined list
         random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
-        send_request "$random_message" "$api_key" "$api_url"
+        send_request "$random_message" "$api_key"
     done
 }
 
