@@ -48,7 +48,7 @@ EOF
                 echo "Response Text: $body"
             fi
         else
-            echo "⚠️ [ERROR] API: $api_url | Status: $http_status | Retrying in 2s..."
+            echo "⚠️ [ERROR] API: $api_url | Status: $http_status | Retrying..."
             sleep 2
         fi
     done
