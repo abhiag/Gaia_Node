@@ -29,25 +29,27 @@ EOF
         http_status=$(echo "$response" | tail -n 1)
         body=$(echo "$response" | head -n -1)
 
+        # Debugging: Print the raw response (Uncomment if needed)
+        # echo "🔍 Debugging Response: $body"
+
         if [[ "$http_status" -eq 200 ]]; then
-            # Extract response content safely
-            response_message=$(echo "$body" | jq -r '.choices[0].message.content' 2>/dev/null)
-
-            if [[ $? -eq 0 && -n "$response_message" ]]; then
-                # Remove unwanted tokens
-                response_message=$(echo "$response_message" | sed -E 's/<\|im_end\|>//g; s/<\|eot_id\|>//g')
-
-                echo "✅ [SUCCESS] API: $api_url | Message: '$message'"
-                echo "Question: $message"
-                echo "Response: $response_message"
-                break  # Exit loop if request was successful
-            else
+            # Validate JSON format before processing
+            if ! echo "$body" | jq empty 2>/dev/null; then
                 echo "⚠️ [ERROR] Invalid JSON response! API: $api_url"
                 echo "Response Text: $body"
+                continue
             fi
+
+            # Extract and clean the response message
+            response_message=$(echo "$body" | jq -r '.choices[0].message.content' | sed 's/<|im_end|>//g; s/<|eot_id|>//g; s/<|end_of_text|>//g')
+
+            echo "✅ [SUCCESS] API: $api_url | Message: '$message'"
+            echo "Question: $message"
+            echo "Response: $response_message"
+            break  # Exit loop if request was successful
         else
             echo "⚠️ [ERROR] API: $api_url | Status: $http_status | Retrying..."
-            sleep 2  # Short delay before retrying
+            sleep 2
         fi
     done
 }
@@ -88,15 +90,15 @@ user_messages=(
     "What is 25 - 5"
 )
 
-# Ask the user to input API Key and API URL
+# Ask the user to input API Key and Domain URL
 echo -n "Enter your API Key: "
-read -r api_key
-echo -n "Enter the API URL: "
-read -r api_url
+read api_key
+echo -n "Enter the Domain URL: "
+read api_url
 
 # Exit if the API Key or URL is empty
 if [ -z "$api_key" ] || [ -z "$api_url" ]; then
-    echo "Error: Both API Key and API URL are required!"
+    echo "Error: Both API Key and Domain URL are required!"
     exit 1
 fi
 
@@ -113,8 +115,11 @@ start_thread() {
     done
 }
 
-# Trap SIGINT and SIGTERM to allow graceful exit
-trap "echo -e '\n🛑 Process terminated. Exiting gracefully...'; exit 0" SIGINT SIGTERM
-
 # Start the single thread
-start_thread
+start_thread &
+
+# Wait for the thread to finish (this will run indefinitely)
+wait
+
+# Graceful exit handling (SIGINT, SIGTERM)
+trap "echo -e '\n🛑 Process terminated. Exiting gracefully...'; exit 0" SIGINT SIGTERM
