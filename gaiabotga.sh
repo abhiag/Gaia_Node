@@ -54,7 +54,7 @@ EOF
     done
 }
 
-# Define a list of predefined messages (your new 10 questions)
+# Define a list of predefined messages (30 GK questions)
 user_messages=(
     "Who was the first person to set foot on the Moon"
     "What is the capital of Canada"
@@ -66,6 +66,26 @@ user_messages=(
     "Which data structure follows the Last In First Out LIFO principle"
     "In JavaScript which keyword is used to declare a constant variable"
     "What does the acronym SQL stand for"
+    "Who painted the Mona Lisa"
+    "What is the largest ocean on Earth"
+    "Which country is known as the Land of the Rising Sun"
+    "Who discovered gravity"
+    "How many continents are there on Earth"
+    "What is the longest river in the world"
+    "What is the national currency of Japan"
+    "Who was the first President of the United States"
+    "What is the smallest planet in the Solar System"
+    "Which country gifted the Statue of Liberty to the United States"
+    "What is the tallest mountain in the world"
+    "Which scientist developed the theory of relativity"
+    "What is the main ingredient in traditional sushi"
+    "Which language has the most native speakers in the world"
+    "How many bones are there in the human body"
+    "What is the capital city of Australia"
+    "Which animal is known as the King of the Jungle"
+    "What is the square root of 64"
+    "Which country is famous for the Eiffel Tower"
+    "What does the acronym NASA stand for"
 )
 
 # Ask the user to input API Key and Domain URL
@@ -90,14 +110,3 @@ start_thread() {
         # Pick a random message from the predefined list
         random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
         send_request "$random_message" "$api_key" "$api_url"
-    done
-}
-
-# Start the single thread
-start_thread &
-
-# Wait for the thread to finish (this will run indefinitely)
-wait
-
-# Graceful exit handling (SIGINT, SIGTERM)
-trap "echo -e '\n🛑 Process terminated. Exiting gracefully...'; exit 0" SIGINT SIGTERM
