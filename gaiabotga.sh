@@ -110,3 +110,14 @@ start_thread() {
         # Pick a random message from the predefined list
         random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
         send_request "$random_message" "$api_key" "$api_url"
+    done
+}
+
+# Start the single thread
+start_thread &
+
+# Wait for the thread to finish (this will run indefinitely)
+wait
+
+# Graceful exit handling (SIGINT, SIGTERM)
+trap "echo -e '\n🛑 Process terminated. Exiting gracefully...'; exit 0" SIGINT SIGTERM
