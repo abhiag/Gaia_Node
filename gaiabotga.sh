@@ -4,7 +4,7 @@
 send_request() {
     local message="$1"
     local api_key="$2"
-    local api_url="https://gadao.gaia.domains/v1/chat/completions"
+    local api_url="https://gacrypto.gaia.domains/v1/chat/completions"
 
     while true; do
         json_data=$(cat <<EOF
