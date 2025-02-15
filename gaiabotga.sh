@@ -4,7 +4,7 @@
 send_request() {
     local message="$1"
     local api_key="$2"
-    local api_url="https://gacrypto.gaia.domains/v1/chat/completions"
+    local api_url="https://hyper.gaia.domains/v1/chat/completions"
 
     while true; do
         json_data=$(cat <<EOF
@@ -91,7 +91,7 @@ fi
 echo "✅ Using fixed domain URL: $api_url"
 
 # Wait for a random time between 1 to 3 minutes before sending the first request
-initial_wait=$((60 + RANDOM % 120))
+initial_wait=$((60 + RANDOM % 240))
 echo "⏳ Waiting for $initial_wait seconds before the first request..."
 sleep $initial_wait
 
