@@ -38,7 +38,7 @@ echo "Download Status: $?"  # Shows the exit status of the wget command
 
 # Extract the tarball
 echo "📂 Extracting the installation package..."
-if tar -xvf multipleforlinux.tar; then
+if tar -xvf MultipleForLinux.tar; then
   echo "Extraction successful!"
 else
   echo "Error: Extraction failed!"
@@ -48,12 +48,12 @@ echo "Extraction Status: $?"  # Shows the exit status of tar command
 
 # Grant permissions to the extracted folder
 echo "🔑 Granting permissions to the extracted folder..."
-chmod -R 777 multipleforlinux
+chmod -R 777 MultipleForLinux
 echo "Permissions Status: $?"  # Shows the exit status of chmod command
 
 # Navigate to the extracted directory
 echo "📂 Navigating to the extracted directory..."
-cd multipleforlinux
+cd MultipleForLinux
 echo "Navigation Status: $?"  # Shows the exit status of cd command
 
 # Grant executable permissions to CLI and Node binaries
@@ -68,7 +68,7 @@ echo "Permissions Status: $?"  # Shows the exit status of chmod for multiple-nod
 
 # Add the directory to PATH
 echo "🔗 Adding Multiple to system PATH..."
-echo "PATH=\$PATH:/root/multipleforlinux" | sudo tee -a /etc/profile
+echo "PATH=\$PATH:/root/MultipleForLinux" | sudo tee -a /etc/profile
 echo "PATH Update Status: $?"  # Shows the exit status of tee command
 
 # Apply the changes to the current session
