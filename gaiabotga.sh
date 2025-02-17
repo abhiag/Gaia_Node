@@ -33,17 +33,20 @@ EOF
                 response_message=$(echo "$body" | jq -r '.choices[0].message.content')
                 echo "Question: $message"
                 echo "Response: $response_message"
-                sleep 60  # Wait for 1 minute before next request
+                
+                sleep_time=$((10 + RANDOM % 11))  # Random sleep between 10-20 seconds
+                sleep "$sleep_time"
                 break
             else
                 echo "⚠️ [ERROR] Invalid JSON response! API: $api_url"
                 echo "Response Text: $body"
-                sleep 60  # Wait for 1 minute before retrying
             fi
         else
             echo "⚠️ [ERROR] API: $api_url | Status: $http_status | Retrying..."
-            sleep 60  # Wait for 1 minute before retrying
         fi
+        
+        sleep_time=$((10 + RANDOM % 11))  # Random sleep between 10-20 seconds before retrying
+        sleep "$sleep_time"
     done
 }
 
@@ -91,7 +94,7 @@ fi
 echo "✅ Using fixed domain URL: $api_url"
 
 # Wait for a random time between 1 to 3 minutes before sending the first request
-initial_wait=$((60 + RANDOM % 240))
+initial_wait=$((30 + RANDOM % 60))
 echo "⏳ Waiting for $initial_wait seconds before the first request..."
 sleep $initial_wait
 
