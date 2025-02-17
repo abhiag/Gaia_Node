@@ -33,7 +33,7 @@ echo "==========================================================="
 
 # Download the Multiple client tarball
 echo "📥 Downloading Multiple for Linux..."
-wget https://cdn.app.multiple.cc/client/linux/x64/multipleforlinux.tar
+wget wget https://mdeck-download.s3.us-east-1.amazonaws.com/client/linux/MultipleForLinux.tar
 echo "Download Status: $?"  # Shows the exit status of the wget command
 
 # Extract the tarball
