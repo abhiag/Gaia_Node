@@ -52,7 +52,7 @@ sudo apt update -y && sudo apt-get install libgomp1 -y
 
 # Install GaiaNet node
 echo "📥 Installing GaiaNet node..."
-curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --ggmlcuda 12
 status=$?
 if [ $status -eq 0 ]; then
     echo "✅ GaiaNet node installation successful!"
