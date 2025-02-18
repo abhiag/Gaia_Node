@@ -142,7 +142,7 @@ else
         source ~/.bashrc
 
         echo "🔄 Retrying initialization..."
-        gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config.json
+        gaianet init --config https://raw.githubusercontent.com/GaiaNet-AI/node-configs/main/qwen-1.5-0.5b-chat/config.json
         retry_status=$?
 
         if [ $retry_status -eq 0 ]; then
