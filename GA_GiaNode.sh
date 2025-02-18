@@ -29,28 +29,13 @@ printf "\n\n"
 GREEN="\033[0;32m"
 RESET="\033[0m"
 
-# Print the advertisement using printf
-printf "${GREEN}"
-printf "🚀 THIS SCRIPT IS PROUDLY CREATED BY **GA CRYPTO**! 🚀\n"
-printf "Stay connected for updates:\n"
-printf "   • Telegram: https://t.me/GaCryptOfficial\n"
-printf "   • X (formerly Twitter): https://x.com/GACryptoO\n"
-printf "${RESET}"
+#!/bin/bash
 
-# Installation and configuration process starts here
-echo "==========================================================="
-echo "🚀 Welcome to GA Crypto's Automated GaiaNet Node Installer 🚀"
-echo "==========================================================="
-echo ""
-echo "🌟 Your journey to decentralized networks begins here!"
-echo "✨ Follow the steps as the script runs automatically for you!"
-echo ""
-
-# Function to check if CUDA is installed
-check_cuda_installed() {
+# Function to check if CUDA is installed and return its version
+get_cuda_version() {
     if command -v nvcc &> /dev/null; then
-        echo "✅ CUDA is already installed."
-        nvcc --version
+        CUDA_VERSION=$(nvcc --version | grep "release" | awk '{print $6}' | cut -d',' -f1)
+        echo "✅ Detected CUDA version: $CUDA_VERSION"
         return 0
     else
         echo "❌ CUDA is not installed."
@@ -64,18 +49,35 @@ install_cuda() {
     sudo apt update -y
     sudo apt install -y nvidia-cuda-toolkit
     if command -v nvcc &> /dev/null; then
-        echo "✅ CUDA installation successful!"
-        nvcc --version
+        CUDA_VERSION=$(nvcc --version | grep "release" | awk '{print $6}' | cut -d',' -f1)
+        echo "✅ CUDA installation successful! Installed version: $CUDA_VERSION"
     else
         echo "❌ Error: CUDA installation failed!"
         exit 1
     fi
 }
 
-# Check if CUDA is installed, if not, install it
-if ! check_cuda_installed; then
+# Check for NVIDIA GPU before proceeding
+check_nvidia_gpu
+
+# If NVIDIA GPU is present, check if CUDA is installed
+if ! get_cuda_version; then
     install_cuda
+    get_cuda_version  # Recheck after installation
 fi
+
+# Determine which --ggmlcuda version to use
+GGML_CUDA_VERSION=""
+if [[ "$CUDA_VERSION" == 11* ]]; then
+    GGML_CUDA_VERSION="11"
+elif [[ "$CUDA_VERSION" == 12* ]]; then
+    GGML_CUDA_VERSION="12"
+else
+    echo "⚠️ Unsupported CUDA version detected: $CUDA_VERSION. Defaulting to CUDA 12."
+    GGML_CUDA_VERSION="12"
+fi
+
+echo "🔧 Using --ggmlcuda $GGML_CUDA_VERSION for GaiaNet installation."
 
 # Set up CUDA environment variables
 echo "🔧 Configuring CUDA environment variables..."
@@ -119,9 +121,9 @@ echo "✅ CUDA environment variables configured successfully and applied immedia
 echo "📦 Installing Common Required Packages..."
 sudo apt update -y && sudo apt-get install libgomp1 -y
 
-# Install GaiaNet node
-echo "📥 Installing GaiaNet node..."
-curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --ggmlcuda 12
+# Install GaiaNet node with the correct CUDA version
+echo "📥 Installing GaiaNet node with CUDA $GGML_CUDA_VERSION support..."
+curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --ggmlcuda "$GGML_CUDA_VERSION"
 status=$?
 
 if [ $status -eq 0 ]; then
