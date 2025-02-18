@@ -31,17 +31,6 @@ RESET="\033[0m"
 
 #!/bin/bash
 
-# Function to check if an NVIDIA GPU is present
-check_nvidia_gpu() {
-    if lspci | grep -i nvidia &> /dev/null; then
-        echo "✅ NVIDIA GPU detected."
-        return 0
-    else
-        echo "❌ No NVIDIA GPU found. CUDA installation is not required."
-        exit 1
-    fi
-}
-
 # Function to check if CUDA is installed and return its version
 get_cuda_version() {
     if command -v nvcc &> /dev/null; then
