@@ -103,8 +103,7 @@ install_gaianet() {
 add_gaianet_to_path() {
     if [[ -d "/opt/gaianet/" ]]; then
         echo "🔗 Adding GaiaNet binary to PATH..."
-        echo 'export PATH=$PATH:/opt/gaianet/' >> "$HOME/.bashrc"
-        source "$HOME/.bashrc"
+        echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
     else
         echo "⚠️ GaiaNet binary directory not found!"
     fi
