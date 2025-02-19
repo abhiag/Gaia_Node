@@ -33,11 +33,46 @@ get_cuda_version() {
     fi
 }
 
+# Function to fix missing dependencies
+fix_dependencies() {
+    echo "🛠️ Fixing missing dependencies..."
+    
+    # Ensure system package list is updated
+    sudo apt update -y
+
+    # Try installing libtinfo5 or fallback to libtinfo6
+    if ! dpkg -s libtinfo5 &> /dev/null; then
+        if apt-cache show libtinfo5 &> /dev/null; then
+            sudo apt install -y libtinfo5
+        else
+            echo "⚠️ libtinfo5 not found in repo, trying libtinfo6..."
+            sudo apt install -y libtinfo6
+        fi
+    fi
+
+    # Fix broken packages
+    sudo apt --fix-broken install -y
+    sudo apt autoremove -y
+}
+
 # Function to install CUDA 12
 install_cuda() {
     echo "📥 Installing CUDA 12..."
+    
+    # Add NVIDIA's CUDA repository
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb
+    sudo dpkg -i cuda-keyring_1.0-1_all.deb
+    
+    # Update package list
     sudo apt update -y
-    sudo apt install -y cuda-toolkit-12-0
+    
+    # Fix dependencies before installation
+    fix_dependencies
+
+    # Install CUDA 12
+    sudo apt install -y cuda
+
+    # Verify installation
     if command -v nvcc &> /dev/null; then
         CUDA_VERSION=$(nvcc --version | grep "release" | awk '{print $6}' | cut -d',' -f1)
         echo "✅ CUDA installation successful! Installed version: $CUDA_VERSION"
@@ -56,6 +91,9 @@ upgrade_cuda() {
 
     install_cuda
 }
+
+# Run the check and update process
+get_cuda_version
 
 # Set up CUDA environment variables
 setup_cuda_env() {
