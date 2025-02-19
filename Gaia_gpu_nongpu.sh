@@ -119,25 +119,7 @@ else
 fi
 
 # Function to add GaiaNet to PATH and retry up to 5 times if needed
-add_gaianet_to_path() {
-    local attempt=1
-    while [ $attempt -le 5 ]; do
-        echo "🔗 Attempt #$attempt: Adding GaiaNet to system PATH..."
-        echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
-
-        # Check if it was successfully added
-        if check_gaianet_path; then
-            echo "✅ GaiaNet added to PATH successfully!"
-            return 0
-        fi
-
-        attempt=$((attempt + 1))
-        sleep 2  # Wait before retrying
-    done
-
-    echo "❌ Error: Failed to add GaiaNet to PATH after 5 attempts!"
-    exit 1
-}
+    curl -O https://raw.githubusercontent.com/abhiag/Gaia_Node/main/gaiapath.sh && chmod +x gaiapath.sh && ./gaiapath.sh
 
 # Check if GaiaNet is already in PATH; if not, attempt to add it
 if ! check_gaianet_path; then
