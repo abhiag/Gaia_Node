@@ -70,6 +70,21 @@ else
     CONFIG_URL="https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config2.json"
 fi
 
+# Install GaiaNet with the determined configuration
+install_gaianet "$CONFIG_URL"
+
+# Initialize GaiaNet node with the specified configuration
+echo "⚙️ Initializing GaiaNet node with config: $CONFIG_URL..."
+gaianet init --config "$CONFIG_URL"
+status=$?
+
+if [ $status -eq 0 ]; then
+    echo "✅ GaiaNet node initialized successfully!"
+else
+    echo "❌ Error: Failed to initialize GaiaNet node!"
+    exit 1
+fi
+
 # Add GaiaNet binary to PATH
 echo "🔗 Adding GaiaNet binary to PATH..."
 if [ -f "/opt/gaianet/gaianet" ]; then
@@ -90,21 +105,6 @@ if command -v gaianet &> /dev/null; then
     echo "✅ GaiaNet found in PATH!"
 else
     echo "❌ GaiaNet is still not in PATH. Try running: source ~/.bashrc"
-    exit 1
-fi
-
-# Install GaiaNet with the determined configuration
-install_gaianet "$CONFIG_URL"
-
-# Initialize GaiaNet node with the specified configuration
-echo "⚙️ Initializing GaiaNet node with config: $CONFIG_URL..."
-gaianet init --config "$CONFIG_URL"
-status=$?
-
-if [ $status -eq 0 ]; then
-    echo "✅ GaiaNet node initialized successfully!"
-else
-    echo "❌ Error: Failed to initialize GaiaNet node!"
     exit 1
 fi
 
