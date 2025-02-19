@@ -118,6 +118,70 @@ else
     gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config2.json
 fi
 
+# Function to add GaiaNet to PATH and retry up to 5 times if needed
+add_gaianet_to_path() {
+    local attempt=1
+    while [ $attempt -le 5 ]; do
+        echo "🔗 Attempt #$attempt: Adding GaiaNet to system PATH..."
+        echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
+
+        # Check if it was successfully added
+        if check_gaianet_path; then
+            echo "✅ GaiaNet added to PATH successfully!"
+            return 0
+        fi
+
+        attempt=$((attempt + 1))
+        sleep 2  # Wait before retrying
+    done
+
+    echo "❌ Error: Failed to add GaiaNet to PATH after 5 attempts!"
+    exit 1
+}
+
+# Check if GaiaNet is already in PATH; if not, attempt to add it
+if ! check_gaianet_path; then
+    add_gaianet_to_path
+else
+    echo "✅ No changes needed; GaiaNet is already in PATH."
+fi
+
+# Initialize GaiaNet node with the specified configuration
+echo "⚙️ Initializing GaiaNet node with the latest configuration..."
+gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config1.json
+status=$?
+
+if [ $status -eq 0 ]; then
+    echo "✅ GaiaNet node initialized successfully!"
+else
+    echo "❌ Error: Failed to initialize GaiaNet node!"
+    echo "🔍 Checking if GaiaNet is in the PATH..."
+
+    # Check if GaiaNet binary exists in /opt/gaianet/
+    if [ -f "/opt/gaianet/gaianet" ]; then
+        echo "✅ GaiaNet binary found in /opt/gaianet/. Adding it to PATH..."
+        echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc
+        source ~/.bashrc
+
+        echo "🔄 Retrying initialization..."
+        gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config1.json
+        retry_status=$?
+
+        if [ $retry_status -eq 0 ]; then
+            echo "✅ GaiaNet node initialized successfully on retry!"
+        else
+            echo "❌ Error: Initialization failed even after fixing PATH!"
+            exit 1
+        fi
+    else
+        echo "❌ GaiaNet binary not found in /opt/gaianet/!"
+        echo "🚨 Please ensure GaiaNet is installed and accessible."
+        exit 1
+    fi
+fi
+
+echo "Status: $status"
+
 # Start the GaiaNet node
 echo "🚀 Starting GaiaNet node..."
 gaianet config --domain gaia.domains
