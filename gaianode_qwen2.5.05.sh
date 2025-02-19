@@ -31,6 +31,22 @@ RESET="\033[0m"
 
 #!/bin/bash
 
+# Ensure pciutils is installed
+echo "📦 Installing pciutils (required for GPU detection)..."
+sudo apt update -y && sudo apt install -y pciutils
+
+# Function to check if an NVIDIA GPU is present
+check_nvidia_gpu() {
+    if lspci | grep -i nvidia &> /dev/null; then
+        echo "✅ NVIDIA GPU detected."
+        return 0
+    else
+        echo "⚠️ No NVIDIA GPU found. Installing GaiaNet **without CUDA**."
+        install_gaianet_without_cuda
+        exit 0
+    fi
+}
+
 # Function to check if CUDA is installed and return its version
 get_cuda_version() {
     if command -v nvcc &> /dev/null; then
@@ -55,6 +71,22 @@ install_cuda() {
         echo "❌ Error: CUDA installation failed!"
         exit 1
     fi
+}
+
+# Function to install GaiaNet without CUDA
+install_gaianet_without_cuda() {
+    echo "📥 Installing GaiaNet node **without CUDA**..."
+    curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+    status=$?
+
+    if [ $status -eq 0 ]; then
+        echo "✅ GaiaNet node installation successful (without CUDA)!"
+    else
+        echo "❌ Error: GaiaNet node installation failed!"
+        exit 1
+    fi
+
+    echo "Status: $status"
 }
 
 # Check for NVIDIA GPU before proceeding
@@ -135,65 +167,43 @@ fi
 
 echo "Status: $status"
 
-# Add GaiaNet to PATH
-echo "🔗 Adding GaiaNet to system PATH..."
-echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
-status=$?
-if [ $status -eq 0 ]; then
-    echo "✅ GaiaNet added to PATH successfully!"
-else
-    echo "❌ Error: Failed to add GaiaNet to PATH!"
-    exit 1
-fi
-echo "Status: $status"
+# Function to check if GaiaNet is in PATH
+check_gaianet_path() {
+    if echo "$PATH" | grep -q "/opt/gaianet"; then
+        echo "✅ GaiaNet is already in system PATH."
+        return 0
+    else
+        return 1
+    fi
+}
 
-# Add GaiaNet to PATH
-echo "🔗 Adding GaiaNet to system PATH..."
-echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
-status=$?
-if [ $status -eq 0 ]; then
-    echo "✅ GaiaNet added to PATH successfully!"
-else
-    echo "❌ Error: Failed to add GaiaNet to PATH!"
-    exit 1
-fi
-echo "Status: $status"
+# Function to add GaiaNet to PATH and retry up to 5 times if needed
+add_gaianet_to_path() {
+    local attempt=1
+    while [ $attempt -le 5 ]; do
+        echo "🔗 Attempt #$attempt: Adding GaiaNet to system PATH..."
+        echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
 
-# Add GaiaNet to PATH
-echo "🔗 Adding GaiaNet to system PATH..."
-echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
-status=$?
-if [ $status -eq 0 ]; then
-    echo "✅ GaiaNet added to PATH successfully!"
-else
-    echo "❌ Error: Failed to add GaiaNet to PATH!"
-    exit 1
-fi
-echo "Status: $status"
+        # Check if it was successfully added
+        if check_gaianet_path; then
+            echo "✅ GaiaNet added to PATH successfully!"
+            return 0
+        fi
 
-# Add GaiaNet to PATH
-echo "🔗 Adding GaiaNet to system PATH..."
-echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
-status=$?
-if [ $status -eq 0 ]; then
-    echo "✅ GaiaNet added to PATH successfully!"
-else
-    echo "❌ Error: Failed to add GaiaNet to PATH!"
-    exit 1
-fi
-echo "Status: $status"
+        attempt=$((attempt + 1))
+        sleep 2  # Wait before retrying
+    done
 
-# Add GaiaNet to PATH
-echo "🔗 Adding GaiaNet to system PATH..."
-echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
-status=$?
-if [ $status -eq 0 ]; then
-    echo "✅ GaiaNet added to PATH successfully!"
-else
-    echo "❌ Error: Failed to add GaiaNet to PATH!"
+    echo "❌ Error: Failed to add GaiaNet to PATH after 5 attempts!"
     exit 1
+}
+
+# Check if GaiaNet is already in PATH; if not, attempt to add it
+if ! check_gaianet_path; then
+    add_gaianet_to_path
+else
+    echo "✅ No changes needed; GaiaNet is already in PATH."
 fi
-echo "Status: $status"
 
 # Initialize GaiaNet node with the specified configuration
 echo "⚙️ Initializing GaiaNet node with the latest configuration..."
