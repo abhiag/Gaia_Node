@@ -14,23 +14,30 @@ else
 fi
 }
 
-# Function to check if CUDA is installed and return its version
+#!/bin/bash
+
+# Function to check CUDA version
 get_cuda_version() {
     if command -v nvcc &> /dev/null; then
         CUDA_VERSION=$(nvcc --version | grep "release" | awk '{print $6}' | cut -d',' -f1)
         echo "✅ Detected CUDA version: $CUDA_VERSION"
-        return 0
+        if [[ "$CUDA_VERSION" == "11."* ]]; then
+            echo "🔄 CUDA 11 detected. Upgrading to CUDA 12..."
+            upgrade_cuda
+        else
+            echo "✅ CUDA is already version 12 or higher. No upgrade needed."
+        fi
     else
-        echo "❌ CUDA is not installed."
-        return 1
+        echo "❌ CUDA is not installed. Installing CUDA 12..."
+        install_cuda
     fi
 }
 
-# Function to install CUDA
+# Function to install CUDA 12
 install_cuda() {
-    echo "📥 Installing CUDA..."
+    echo "📥 Installing CUDA 12..."
     sudo apt update -y
-    sudo apt install -y nvidia-cuda-toolkit
+    sudo apt install -y cuda-toolkit-12-0
     if command -v nvcc &> /dev/null; then
         CUDA_VERSION=$(nvcc --version | grep "release" | awk '{print $6}' | cut -d',' -f1)
         echo "✅ CUDA installation successful! Installed version: $CUDA_VERSION"
@@ -38,6 +45,16 @@ install_cuda() {
         echo "❌ Error: CUDA installation failed!"
         exit 1
     fi
+}
+
+# Function to upgrade CUDA 11 to CUDA 12
+upgrade_cuda() {
+    echo "❌ Removing CUDA 11..."
+    sudo apt remove --purge -y nvidia-cuda-toolkit cuda-toolkit-11-*
+    sudo apt autoremove -y
+    echo "✅ CUDA 11 removed."
+
+    install_cuda
 }
 
 # Set up CUDA environment variables
