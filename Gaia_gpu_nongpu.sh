@@ -81,6 +81,7 @@ install_gaianet() {
 add_gaianet_to_path() {
     echo "🔗 Adding GaiaNet binary to PATH..."
     echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
+    export PATH=$PATH:/opt/gaianet/ >> ~/.bashrc && source ~/.bashrc
 }
 
 # Detect GPU
