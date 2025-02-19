@@ -68,15 +68,28 @@ get_cuda_version() {
 
 # Function to install CUDA toolkit
 install_cuda_toolkit() {
-    echo "📥 Installing CUDA toolkit..."
     OS_VERSION=$(lsb_release -sr)
+    if [[ "$OS_VERSION" != "20.04" && "$OS_VERSION" != "22.04" ]]; then
+        echo "⚠️ Ubuntu $OS_VERSION is not officially supported by NVIDIA CUDA."
+        echo "Please use Ubuntu 20.04 or 22.04, or install CUDA manually."
+        exit 1
+    fi
+
+    echo "📥 Installing CUDA toolkit..."
     wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu${OS_VERSION}/x86_64/cuda-ubuntu${OS_VERSION}.pin
     sudo mv cuda-ubuntu${OS_VERSION}.pin /etc/apt/preferences.d/cuda-repository-pin-600
     sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu${OS_VERSION}/x86_64/7fa2af80.pub
     sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu${OS_VERSION}/x86_64/ /"
     sudo apt-get update
-    sudo apt-get -y install cuda-toolkit-12-3
+    sudo apt install -y cuda-toolkit
     echo "✅ CUDA toolkit installation successful!"
+
+    # Set up CUDA environment variables
+    echo "🔧 Setting up CUDA environment variables..."
+    echo 'export PATH=/usr/local/cuda/bin:$PATH' >> ~/.bashrc
+    echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH' >> ~/.bashrc
+    source ~/.bashrc
+    echo "✅ CUDA environment variables configured."
 }
 
 # Function to install GaiaNet
