@@ -10,7 +10,7 @@ check_nvidia_gpu() {
         echo "✅ NVIDIA GPU detected."
         return 0
     else
-        echo "⚠️ No NVIDIA GPU found."
+        echo "⚠️ No NVIDIA GPU found. Installing GaiaNet **without CUDA**."
         return 1
     fi
 }
@@ -41,134 +41,79 @@ install_cuda() {
     fi
 }
 
-# Set up CUDA environment variables
-setup_cuda_env() {
-    echo "🔧 Configuring CUDA environment variables..."
-    CUDA_PATH="/usr/local/cuda"
-    EXPORT_LD_LIBRARY_PATH="export LD_LIBRARY_PATH=${CUDA_PATH}/lib64:\$LD_LIBRARY_PATH"
-    EXPORT_PATH="export PATH=${CUDA_PATH}/bin:\$PATH"
-    BASHRC="$HOME/.bashrc"
-    
-    # Add to shell config
-    if ! grep -qxF "$EXPORT_LD_LIBRARY_PATH" "$BASHRC"; then
-        echo "$EXPORT_LD_LIBRARY_PATH" >> "$BASHRC"
-    fi
-    if ! grep -qxF "$EXPORT_PATH" "$BASHRC"; then
-        echo "$EXPORT_PATH" >> "$BASHRC"
-    fi
-
-    # Apply changes immediately
-    export LD_LIBRARY_PATH=${CUDA_PATH}/lib64:$LD_LIBRARY_PATH
-    export PATH=${CUDA_PATH}/bin:$PATH
-    source ~/.bashrc
-    echo "✅ CUDA environment configured!"
-}
-
-# Function to install GaiaNet
+# Function to install GaiaNet with the specified configuration
 install_gaianet() {
-    echo "📥 Installing GaiaNet node..."
+    local config_url=$1
+    echo "📥 Installing GaiaNet node with config: $config_url..."
     curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
-    if [ $? -eq 0 ]; then
+    status=$?
+
+    if [ $status -eq 0 ]; then
         echo "✅ GaiaNet node installation successful!"
     else
         echo "❌ Error: GaiaNet node installation failed!"
         exit 1
     fi
+
+    echo "Status: $status"
 }
 
-# Function to add GaiaNet binary to PATH
-add_gaianet_to_path() {
-    echo "🔗 Adding GaiaNet binary to PATH..."
-    export PATH=$PATH:/opt/gaianet/
-    echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc
-    source ~/.bashrc
-}
-
-# Install required system packages
-echo "📦 Installing required system packages..."
-sudo apt update -y && sudo apt-get install -y libgomp1
-
-# Detect GPU
+# Check for NVIDIA GPU before proceeding
 if check_nvidia_gpu; then
-    echo "🔍 Checking CUDA installation..."
+    # If NVIDIA GPU is present, check if CUDA is installed
     if ! get_cuda_version; then
         install_cuda
-        setup_cuda_env
+        get_cuda_version  # Recheck after installation
     fi
-
-    # Determine CUDA version for GaiaNet installation
-    GGML_CUDA_VERSION="12"
-    if [[ "$CUDA_VERSION" == 11* ]]; then
-        GGML_CUDA_VERSION="11"
-    elif [[ "$CUDA_VERSION" == 12* ]]; then
-        GGML_CUDA_VERSION="12"
-    fi
-    echo "🔧 Using --ggmlcuda $GGML_CUDA_VERSION for GaiaNet installation."
-
-    # Install GaiaNet with CUDA support
-    install_gaianet
-    add_gaianet_to_path
-    echo "⚙️ Initializing GaiaNet node with CUDA..."
-    gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config1.json
+    CONFIG_URL="https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config1.json"
 else
-    # Install GaiaNet without CUDA
-    install_gaianet
-    add_gaianet_to_path
-    echo "⚙️ Initializing GaiaNet node without CUDA..."
-    gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config2.json
+    CONFIG_URL="https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config2.json"
 fi
 
-# Function to add GaiaNet to PATH and retry up to 5 times if needed
-    curl -O https://raw.githubusercontent.com/abhiag/Gaia_Node/main/gaiapath.sh && chmod +x gaiapath.sh && ./gaiapath.sh
-
-# Check if GaiaNet is already in PATH; if not, attempt to add it
-if ! check_gaianet_path; then
-    add_gaianet_to_path
+# Add GaiaNet binary to PATH
+echo "🔗 Adding GaiaNet binary to PATH..."
+if [ -f "/opt/gaianet/gaianet" ]; then
+    echo "✅ GaiaNet binary found in /opt/gaianet/. Adding to PATH..."
+    export PATH=$PATH:/opt/gaianet/
+    echo 'export PATH=$PATH:/opt/gaianet/' | sudo tee -a /etc/profile.d/gaianet.sh > /dev/null
+    echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc
+    echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.profile
+    source ~/.bashrc
+    source ~/.profile
 else
-    echo "✅ No changes needed; GaiaNet is already in PATH."
+    echo "❌ GaiaNet binary not found in /opt/gaianet/! Proceeding with installation..."
 fi
+
+# Verify if GaiaNet is accessible
+echo "🔍 Checking if GaiaNet is accessible..."
+if command -v gaianet &> /dev/null; then
+    echo "✅ GaiaNet found in PATH!"
+else
+    echo "❌ GaiaNet is still not in PATH. Try running: source ~/.bashrc"
+    exit 1
+fi
+
+# Install GaiaNet with the determined configuration
+install_gaianet "$CONFIG_URL"
 
 # Initialize GaiaNet node with the specified configuration
-echo "⚙️ Initializing GaiaNet node with the latest configuration..."
-gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config1.json
+echo "⚙️ Initializing GaiaNet node with config: $CONFIG_URL..."
+gaianet init --config "$CONFIG_URL"
 status=$?
 
 if [ $status -eq 0 ]; then
     echo "✅ GaiaNet node initialized successfully!"
 else
     echo "❌ Error: Failed to initialize GaiaNet node!"
-    echo "🔍 Checking if GaiaNet is in the PATH..."
-
-    # Check if GaiaNet binary exists in /opt/gaianet/
-    if [ -f "/opt/gaianet/gaianet" ]; then
-        echo "✅ GaiaNet binary found in /opt/gaianet/. Adding it to PATH..."
-        echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc
-        source ~/.bashrc
-
-        echo "🔄 Retrying initialization..."
-        gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config1.json
-        retry_status=$?
-
-        if [ $retry_status -eq 0 ]; then
-            echo "✅ GaiaNet node initialized successfully on retry!"
-        else
-            echo "❌ Error: Initialization failed even after fixing PATH!"
-            exit 1
-        fi
-    else
-        echo "❌ GaiaNet binary not found in /opt/gaianet/!"
-        echo "🚨 Please ensure GaiaNet is installed and accessible."
-        exit 1
-    fi
+    exit 1
 fi
-
-echo "Status: $status"
 
 # Start the GaiaNet node
 echo "🚀 Starting GaiaNet node..."
 gaianet config --domain gaia.domains
 gaianet start
-if [ $? -eq 0 ]; then
+status=$?
+if [ $status -eq 0 ]; then
     echo "✅ GaiaNet node started successfully!"
 else
     echo "❌ Error: Failed to start GaiaNet node!"
@@ -178,7 +123,8 @@ fi
 # Display GaiaNet node info
 echo "🔍 Fetching GaiaNet node information..."
 gaianet info
-if [ $? -eq 0 ]; then
+status=$?
+if [ $status -eq 0 ]; then
     echo "✅ GaiaNet node information fetched successfully!"
 else
     echo "❌ Error: Failed to fetch GaiaNet node information!"
