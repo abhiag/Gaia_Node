@@ -1,13 +1,12 @@
 #!/bin/bash
 
-# Function to handle the API request
+# Function to send the API request
 send_request() {
     local message="$1"
     local api_key="$2"
-    local api_url="https://hyper.gaia.domains/v1/chat/completions"
+    local api_url="https://gacrypto.gaia.domains/v1/chat/completions"
 
-    while true; do
-        json_data=$(cat <<EOF
+    json_data=$(cat <<EOF
 {
     "messages": [
         {"role": "system", "content": "You are a helpful assistant."},
@@ -15,98 +14,82 @@ send_request() {
     ]
 }
 EOF
-        )
+    )
 
-        response=$(curl -s -w "\n%{http_code}" -X POST "$api_url" \
-            -H "Authorization: Bearer $api_key" \
-            -H "Accept: application/json" \
-            -H "Content-Type: application/json" \
-            -d "$json_data")
+    response=$(curl -s -w "\n%{http_code}" -X POST "$api_url" \
+        -H "Authorization: Bearer $api_key" \
+        -H "Accept: application/json" \
+        -H "Content-Type: application/json" \
+        -d "$json_data")
 
-        http_status=$(echo "$response" | tail -n 1)
-        body=$(echo "$response" | head -n -1)
+    http_status=$(echo "$response" | tail -n1)
+    body=$(echo "$response" | head -n -1)
 
-        if [[ "$http_status" -eq 200 ]]; then
-            echo "$body" | jq . > /dev/null 2>&1
-            if [ $? -eq 0 ]; then
-                echo "✅ [SUCCESS] API: $api_url | Message: '$message'"
-                response_message=$(echo "$body" | jq -r '.choices[0].message.content')
-                echo "Question: $message"
-                echo "Response: $response_message"
-                
-                sleep_time=$((10 + RANDOM % 11))  # Random sleep between 10-20 seconds
-                sleep "$sleep_time"
-                break
-            else
-                echo "⚠️ [ERROR] Invalid JSON response! API: $api_url"
-                echo "Response Text: $body"
-            fi
-        else
-            echo "⚠️ [ERROR] API: $api_url | Status: $http_status | Retrying..."
-        fi
-        
-        sleep_time=$((10 + RANDOM % 11))  # Random sleep between 10-20 seconds before retrying
-        sleep "$sleep_time"
-    done
+    if [[ "$http_status" -eq 200 ]]; then
+        response_message=$(echo "$body" | jq -r '.choices[0].message.content')
+        echo "✅ [SUCCESS] Request sent successfully!"
+        echo "🔹 Question: $message"
+        echo "🔸 Response: $response_message"
+    else
+        echo "⚠️ [ERROR] Request failed | Status: $http_status"
+    fi
 }
 
+# New list of math-related messages
 user_messages=(
-    "Who was the first person to set foot on the Moon"
-    "What is the capital of Canada"
-    "Who wrote the famous play Romeo and Juliet"
-    "Which planet is known as the Red Planet"
-    "What is the chemical symbol for gold"
-    "What does HTML stand for"
-    "What is the output of print(2 ** 3) in Python"
-    "Which data structure follows the Last In First Out LIFO principle"
-    "In JavaScript which keyword is used to declare a constant variable"
-    "What does the acronym SQL stand for"
-    "Who painted the Mona Lisa"
-    "What is the largest ocean on Earth"
-    "Which country is known as the Land of the Rising Sun"
-    "Who discovered gravity"
-    "How many continents are there on Earth"
-    "What is the longest river in the world"
-    "What is the national currency of Japan"
-    "Who was the first President of the United States"
-    "What is the smallest planet in the Solar System"
-    "Which country gifted the Statue of Liberty to the United States"
-    "What is the tallest mountain in the world"
-    "Which scientist developed the theory of relativity"
-    "What is the main ingredient in traditional sushi"
-    "Which language has the most native speakers in the world"
-    "How many bones are there in the human body"
-    "What is the capital city of Australia"
-    "Which animal is known as the King of the Jungle"
-    "What is the square root of 64"
-    "Which country is famous for the Eiffel Tower"
-    "What does the acronym NASA stand for"
+    "What is 8 + 5?"
+    "What is 12 - 7?"
+    "What is 6 × 4?"
+    "What is 20 ÷ 5?"
+    "What is 15 + 9?"
+    "What is 50 - 25?"
+    "What is 9 × 3?"
+    "What is 36 ÷ 6?"
+    "What is 7 + 8?"
+    "What is 14 - 6?"
+    "What is 5 × 7?"
+    "What is 81 ÷ 9?"
+    "What is 25 + 17?"
+    "What is 60 - 32?"
+    "What is 11 × 6?"
+    "What is 100 ÷ 20?"
+    "What is 19 + 4?"
+    "What is 45 - 18?"
+    "What is 8 × 9?"
+    "What is 72 ÷ 8?"
+    "What is 13 + 29?"
+    "What is 90 - 44?"
+    "What is 4 × 12?"
+    "What is 144 ÷ 12?"
+    "What is 33 + 27?"
+    "What is 81 - 39?"
+    "What is 7 × 11?"
+    "What is 225 ÷ 15?"
+    "What is 56 + 14?"
+    "What is 98 - 56?"
 )
 
-echo -n "Enter your API Key: "
-read api_key
+# Prompt for API Key (hidden input)
+read -rsp "🔑 Enter your API Key: " api_key
+echo ""
 
-if [ -z "$api_key" ]; then
-    echo "Error: API Key is required!"
+# Validate API Key
+if [[ -z "$api_key" ]]; then
+    echo "❌ Error: API Key is required!"
     exit 1
 fi
 
-echo "✅ Using fixed domain URL: $api_url"
+echo "✅ Connection initialized successfully!"
 
-# Wait for a random time between 1 to 3 minutes before sending the first request
-initial_wait=$((30 + RANDOM % 60))
-echo "⏳ Waiting for $initial_wait seconds before the first request..."
-sleep $initial_wait
+# Random delay before sending the request (1-2 minutes)
+initial_wait=$((60 + RANDOM % 61))
+echo "⏳ Preparing request... (Waiting for $initial_wait seconds)"
+sleep "$initial_wait"
 
-start_thread() {
-    while true; do
-        random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
-        send_request "$random_message" "$api_key"
-    done
-}
+# Pick a random message
+random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
 
-start_thread &
+# Send the request
+send_request "$random_message" "$api_key"
 
-wait
-
-trap "echo -e '\n🛑 Process terminated. Exiting gracefully...'; exit 0" SIGINT SIGTERM
+echo "✅ Script execution complete."
