@@ -62,24 +62,35 @@ get_cuda_version() {
 
 # Function to install CUDA Toolkit 12.8
 install_cuda() {
-
     echo "📥 Adding NVIDIA GPG Key and CUDA repository..."
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
-    sudo dpkg -i cuda-keyring_1.1-1_all.deb
-    echo "deb [signed-by=/usr/share/keyrings/cuda-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/ /" | sudo tee /etc/apt/sources.list.d/cuda.list
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.0-1_all.deb
+    sudo dpkg -i cuda-keyring_1.0-1_all.deb
     
     sudo apt update
-    echo "📥 Installing CUDA Toolkit latest..."
-    sudo apt install -y cuda-toolkit
+    echo "📥 Installing CUDA Toolkit 12.8..."
+    sudo apt install -y cuda-toolkit-12-8
+
+    # Verify CUDA installation
+    if command -v nvcc &> /dev/null; then
+        echo "✅ CUDA successfully installed: $(nvcc --version | grep 'release' | awk '{print $6}' | cut -d',' -f1)"
+        setup_cuda_env
+    else
+        echo "❌ CUDA installation failed. Exiting..."
+        exit 1
+    fi
 }
 
 # Function to set up environment variables
 setup_cuda_env() {
     echo "🔧 Setting up CUDA environment variables..."
-    echo 'export PATH=/usr/local/cuda-12.8/bin${PATH:+:${PATH}}' >> ~/.bashrc
-    echo 'export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}' >> ~/.bashrc
+    echo 'export PATH=/usr/local/cuda/bin:$PATH' >> ~/.bashrc
+    echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH' >> ~/.bashrc
     source ~/.bashrc
 }
+
+# Main Execution Flow
+check_nvidia_gpu || exit 1  # Exit if no NVIDIA GPU is found
+get_cuda_version || exit 1  # Exit if CUDA is not properly installed
 
 # Function to install GaiaNet
 install_gaianet() {
