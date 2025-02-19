@@ -16,14 +16,19 @@ fi
 
 # Function to check CUDA version
 get_cuda_version() {
-    if command -v nvcc &> /dev/null; then
-        CUDA_VERSION=$(nvcc --version | grep "release" | awk '{print $6}' | cut -d',' -f1)
-        echo "✅ Detected CUDA version: $CUDA_VERSION"
+    if command -v nvidia-smi &> /dev/null; then
+        CUDA_VERSION=$(nvidia-smi | grep "CUDA Version" | awk '{print $NF}')
+        
+        if [[ -z "$CUDA_VERSION" ]]; then
+            echo "⚠️ CUDA is installed but version detection failed. Checking manually..."
+            CUDA_VERSION=$(ls /usr/local/ | grep cuda- | sed 's/cuda-//')
+        fi
+
         if [[ "$CUDA_VERSION" == "11."* ]]; then
-            echo "🔄 CUDA 11 detected. Upgrading to CUDA 12..."
+            echo "🔄 CUDA 11 detected ($CUDA_VERSION). Upgrading to CUDA 12..."
             upgrade_cuda
         else
-            echo "✅ CUDA 12 is already installed. No upgrade needed."
+            echo "✅ CUDA 12 or higher is already installed ($CUDA_VERSION). No upgrade needed."
             exit 0
         fi
     else
