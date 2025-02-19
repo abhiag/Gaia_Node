@@ -62,18 +62,15 @@ get_cuda_version() {
 
 # Function to install CUDA Toolkit 12.8
 install_cuda() {
-    echo "📥 Installing NVIDIA drivers..."
-    sudo ubuntu-drivers autoinstall
-    sudo reboot
-    
+
     echo "📥 Adding NVIDIA GPG Key and CUDA repository..."
     wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
     sudo dpkg -i cuda-keyring_1.1-1_all.deb
     echo "deb [signed-by=/usr/share/keyrings/cuda-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/ /" | sudo tee /etc/apt/sources.list.d/cuda.list
     
     sudo apt update
-    echo "📥 Installing CUDA Toolkit 12.8..."
-    sudo apt install -y cuda-toolkit-12-8
+    echo "📥 Installing CUDA Toolkit latest..."
+    sudo apt install -y cuda-toolkit
 }
 
 # Function to set up environment variables
