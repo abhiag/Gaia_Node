@@ -7,13 +7,11 @@ sudo apt update -y && sudo apt-get install -y libgomp1
 
 # Function to check if an NVIDIA GPU is present
 check_nvidia_gpu() {
-    if lspci | grep -i nvidia &> /dev/null; then
-        echo "✅ NVIDIA GPU detected."
-        return 0
-    else
-        echo "⚠️ No NVIDIA GPU found."
-        return 1
-    fi
+    if command -v nvidia-smi &> /dev/null; then
+    echo "✅ NVIDIA GPU detected."
+else
+    echo "⚠️ No NVIDIA GPU found."
+fi
 }
 
 # Function to check if CUDA is installed and return its version
