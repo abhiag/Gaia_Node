@@ -46,16 +46,18 @@ check_nvidia_gpu() {
     fi
 }
 
+#!/bin/bash
+
 # Function to get CUDA version
 get_cuda_version() {
-    if ! command -v nvidia-smi &> /dev/null; then
+    if ! command -v nvcc &> /dev/null; then
         echo "❌ CUDA is not installed. Installing CUDA 12..."
         install_cuda
         return
     fi
 
-    CUDA_VERSION=$(nvidia-smi | grep -oP 'CUDA Version: \K[0-9]+\.[0-9]+')
-    
+    CUDA_VERSION=$(nvcc --version | grep -oP 'release \K[0-9]+\.[0-9]+')
+
     if [[ -z "$CUDA_VERSION" ]]; then
         echo "⚠️ CUDA version detection failed. Checking manually..."
         CUDA_VERSION=$(ls /usr/local/ | grep -oP 'cuda-\K[0-9]+')
@@ -72,11 +74,19 @@ get_cuda_version() {
 # Function to install CUDA 12
 install_cuda() {
     echo "📥 Installing CUDA 12..."
-    wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb
+
+    # Detect Ubuntu version
+    UBUNTU_VERSION=$(lsb_release -sr | tr -d '.')
+
+    # Ensure correct repository key is added
+    wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu${UBUNTU_VERSION}/x86_64/cuda-keyring_1.0-1_all.deb
     sudo dpkg -i cuda-keyring_1.0-1_all.deb
+
+    # Update and install CUDA
     sudo apt update -y
     sudo apt install -y cuda
-    
+
+    # Verify installation
     if command -v nvcc &> /dev/null; then
         CUDA_VERSION=$(nvcc --version | grep -oP 'release \K[0-9]+\.[0-9]+')
         echo "✅ CUDA installation successful! Installed version: $CUDA_VERSION"
@@ -84,6 +94,11 @@ install_cuda() {
         echo "❌ Error: CUDA installation failed!"
         exit 1
     fi
+
+    # Add CUDA to PATH
+    echo "export PATH=/usr/local/cuda/bin:\$PATH" >> ~/.bashrc
+    echo "export LD_LIBRARY_PATH=/usr/local/cuda/lib64:\$LD_LIBRARY_PATH" >> ~/.bashrc
+    source ~/.bashrc
 }
 
 # Function to upgrade CUDA 11 to CUDA 12
