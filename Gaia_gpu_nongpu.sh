@@ -3,6 +3,7 @@
 # Ensure pciutils is installed
 echo "📦 Installing pciutils (required for GPU detection)..."
 sudo apt update -y && sudo apt install -y pciutils
+sudo apt update -y && sudo apt-get install -y libgomp1
 
 # Function to check if an NVIDIA GPU is present
 check_nvidia_gpu() {
@@ -79,14 +80,8 @@ install_gaianet() {
 # Function to add GaiaNet binary to PATH
 add_gaianet_to_path() {
     echo "🔗 Adding GaiaNet binary to PATH..."
-    export PATH=$PATH:/opt/gaianet/
-    echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc
-    source ~/.bashrc
+    echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
 }
-
-# Install required system packages
-echo "📦 Installing required system packages..."
-sudo apt update -y && sudo apt-get install -y libgomp1
 
 # Detect GPU
 if check_nvidia_gpu; then
