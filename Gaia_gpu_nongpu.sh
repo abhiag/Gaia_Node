@@ -58,6 +58,30 @@ install_gaianet() {
     echo "Status: $status"
 }
 
+# Add GaiaNet binary to PATH
+echo "🔗 Adding GaiaNet binary to PATH..."
+if [ -f "/opt/gaianet/gaianet" ]; then
+    echo "✅ GaiaNet binary found in /opt/gaianet/. Adding to PATH..."
+    export PATH=$PATH:/opt/gaianet/
+    echo 'export PATH=$PATH:/opt/gaianet/' | sudo tee -a /etc/profile.d/gaianet.sh > /dev/null
+    echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc
+    echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.profile
+    source ~/.bashrc
+    source ~/.profile
+else
+    echo "❌ GaiaNet binary not found in /opt/gaianet/! Exiting."
+    exit 1
+fi
+
+# Verify if GaiaNet is accessible
+echo "🔍 Checking if GaiaNet is accessible..."
+if command -v gaianet &> /dev/null; then
+    echo "✅ GaiaNet found in PATH!"
+else
+    echo "❌ GaiaNet is still not in PATH. Try running: source ~/.bashrc"
+    exit 1
+fi
+
 # Check for NVIDIA GPU before proceeding
 if check_nvidia_gpu; then
     # If NVIDIA GPU is present, check if CUDA is installed
