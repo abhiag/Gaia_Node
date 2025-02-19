@@ -95,7 +95,7 @@ get_cuda_version || exit 1  # Exit if CUDA is not properly installed
 # Function to install GaiaNet
 install_gaianet() {
     echo "📥 Installing GaiaNet node..."
-    curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash || { echo "❌ GaiaNet installation failed!"; exit 1; }
+    curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --ggmlcuda 12 || { echo "❌ GaiaNet installation failed!"; exit 1; }
     echo "✅ GaiaNet node installation successful!"
 }
 
