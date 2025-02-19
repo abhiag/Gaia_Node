@@ -29,7 +29,7 @@ printf "\n\n"
 GREEN="\033[0;32m"
 RESET="\033[0m"
 
-set -e  # Exit on error
+#!/bin/bash
 
 # Ensure required packages are installed
 echo "📦 Installing dependencies..."
@@ -40,13 +40,14 @@ check_nvidia_gpu() {
     if command -v nvidia-smi &> /dev/null; then
         echo "✅ NVIDIA GPU detected."
         return 0
+    elif lspci | grep -i nvidia &> /dev/null; then
+        echo "✅ NVIDIA GPU detected (via lspci)."
+        return 0
     else
         echo "⚠️ No NVIDIA GPU found."
         return 1
     fi
 }
-
-#!/bin/bash
 
 # Function to get CUDA version
 get_cuda_version() {
@@ -60,7 +61,9 @@ get_cuda_version() {
 
     if [[ -z "$CUDA_VERSION" ]]; then
         echo "⚠️ CUDA version detection failed. Checking manually..."
-        CUDA_VERSION=$(ls /usr/local/ | grep -oP 'cuda-\K[0-9]+')
+        if [[ -f "/usr/local/cuda/version.txt" ]]; then
+            CUDA_VERSION=$(cat /usr/local/cuda/version.txt | grep -oP '[0-9]+\.[0-9]+')
+        fi
     fi
 
     if [[ "$CUDA_VERSION" =~ ^11 ]]; then
@@ -75,11 +78,15 @@ get_cuda_version() {
 install_cuda() {
     echo "📥 Installing CUDA 12..."
 
-    # Detect Ubuntu version
-    UBUNTU_VERSION=$(lsb_release -sr | tr -d '.')
+    # Detect Ubuntu version for compatibility with NVIDIA repository
+    UBUNTU_VERSION=$(lsb_release -sr | cut -d'.' -f1,2 | tr -d '.')
+    if [[ "$UBUNTU_VERSION" != "2004" && "$UBUNTU_VERSION" != "2204" ]]; then
+        echo "⚠️ Unsupported Ubuntu version detected ($UBUNTU_VERSION). Defaulting to Ubuntu 20.04 repo."
+        UBUNTU_VERSION="2004"
+    fi
 
     # Ensure correct repository key is added
-    wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu${UBUNTU_VERSION}/x86_64/cuda-keyring_1.0-1_all.deb
+    wget -q "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu${UBUNTU_VERSION}/x86_64/cuda-keyring_1.0-1_all.deb"
     sudo dpkg -i cuda-keyring_1.0-1_all.deb
 
     # Update and install CUDA
@@ -124,15 +131,19 @@ setup_cuda_env() {
 # Function to install GaiaNet
 install_gaianet() {
     echo "📥 Installing GaiaNet node..."
-    curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+    curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash || { echo "❌ GaiaNet installation failed!"; exit 1; }
     echo "✅ GaiaNet node installation successful!"
 }
 
 # Function to add GaiaNet binary to PATH
 add_gaianet_to_path() {
-    echo "🔗 Adding GaiaNet binary to PATH..."
-    echo 'export PATH=$PATH:/opt/gaianet/' >> "$HOME/.bashrc"
-    source "$HOME/.bashrc"
+    if [[ -d "/opt/gaianet/" ]]; then
+        echo "🔗 Adding GaiaNet binary to PATH..."
+        echo 'export PATH=$PATH:/opt/gaianet/' >> "$HOME/.bashrc"
+        source "$HOME/.bashrc"
+    else
+        echo "⚠️ GaiaNet binary directory not found!"
+    fi
 }
 
 # Run checks and installations
@@ -142,12 +153,12 @@ if check_nvidia_gpu; then
     install_gaianet
     add_gaianet_to_path
     echo "⚙️ Initializing GaiaNet node with CUDA..."
-    gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config1.json
+    gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config1.json || { echo "❌ GaiaNet initialization failed!"; exit 1; }
 else
     install_gaianet
     add_gaianet_to_path
     echo "⚙️ Initializing GaiaNet node without CUDA..."
-    gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config2.json
+    gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config2.json || { echo "❌ GaiaNet initialization failed!"; exit 1; }
 fi
 
 # Start GaiaNet node
@@ -162,5 +173,8 @@ gaianet info || { echo "❌ Error: Failed to fetch GaiaNet node information!"; e
 echo "==========================================================="
 echo "🎉 Congratulations! Your GaiaNet node is successfully set up!"
 echo "🌟 Stay connected: Telegram: https://t.me/GaCryptOfficial | Twitter: https://x.com/GACryptoO"
+echo "💪 Together, let's build the future of decentralized networks!"
+echo "==========================================================="
+
 echo "💪 Together, let's build the future of decentralized networks!"
 echo "==========================================================="
