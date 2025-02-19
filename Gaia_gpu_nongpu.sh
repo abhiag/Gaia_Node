@@ -19,6 +19,7 @@ install_gaianet_without_cuda() {
 
     echo "⚙️ Initializing GaiaNet node with config2.json..."
     gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config2.json
+    exit 0
 }
 
 # Function to check for NVIDIA GPU
@@ -29,7 +30,6 @@ check_nvidia_gpu() {
     else
         echo "⚠️ No NVIDIA GPU found. Installing GaiaNet **without CUDA**."
         install_gaianet_without_cuda
-        exit 0
     fi
 }
 
