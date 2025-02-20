@@ -6,7 +6,7 @@ API_URL="https://soneium.gaia.domains/v1/chat/completions"
 # Function to check if NVIDIA CUDA is installed
 check_cuda() {
     if ! command -v nvcc &> /dev/null || ! command -v nvidia-smi &> /dev/null; then
-        echo "❌ NVIDIA CUDA is not installed or not found! Please install CUDA before running this script."
+        echo "❌ NVIDIA CUDA is not found! You Must Have Nvidia GPU in Your Computer."
         exit 1
     else
         echo "✅ NVIDIA CUDA is installed."
