@@ -1,19 +1,7 @@
 #!/bin/bash
 
-# Empty API URL (hidden at the top)
+# Hidden API URL (moved to the bottom)
 API_URL=""
-
-# Function to check if NVIDIA CUDA is installed
-check_cuda() {
-    if ! command -v nvcc &> /dev/null || ! command -v nvidia-smi &> /dev/null; then
-        echo "❌ NVIDIA CUDA is not found! You must have an NVIDIA GPU."
-        exit 1
-    else
-        echo "✅ NVIDIA CUDA is installed."
-        nvcc --version
-        nvidia-smi
-    fi
-}
 
 # Function to generate a fully random math question
 generate_random_math_question() {
@@ -31,52 +19,19 @@ generate_random_math_question() {
     echo "$question"
 }
 
-# Large list of predefined GK questions
+# List of predefined GK questions
 gk_questions=(
     "What is the capital of France?"
     "Who wrote 'Romeo and Juliet'?"
     "What is the largest planet in our Solar System?"
     "Who painted the Mona Lisa?"
     "What is the chemical symbol for gold?"
-    "How many continents are there on Earth?"
     "Who was the first President of the United States?"
-    "What is the national animal of India?"
-    "Which is the longest river in the world?"
-    "What year did World War II end?"
+    "What is the longest river in the world?"
     "Who discovered gravity?"
     "Which is the tallest mountain in the world?"
     "What is the hardest natural substance on Earth?"
-    "Which ocean is the largest?"
-    "How many bones are in the human body?"
-    "Who invented the telephone?"
-    "What is the smallest country in the world?"
-    "Which planet is known as the 'Red Planet'?"
-    "What is the main language spoken in Brazil?"
-    "Who developed the theory of relativity?"
-    "Which country is known as the Land of the Rising Sun?"
-    "What is the currency of Japan?"
-    "Which animal is known as the 'King of the Jungle'?"
-    "What is the chemical formula for water?"
-    "Who is the author of 'Harry Potter'?"
-    "Which bird is known for its ability to mimic human speech?"
-    "Who was the first man to walk on the moon?"
-    "What is the national sport of Canada?"
-    "Which is the fastest land animal?"
-    "What does 'www' stand for in a website address?"
-    "Which gas do plants absorb from the atmosphere?"
-    "What is the tallest building in the world?"
-    "Who is known as the 'Father of Computers'?"
-    "Which country gifted the Statue of Liberty to the USA?"
-    "Which is the only mammal capable of flight?"
-    "What is the capital city of Australia?"
-    "Who discovered penicillin?"
     "What is the boiling point of water in Celsius?"
-    "Which desert is the largest in the world?"
-    "What is the name of the longest-running animated TV show?"
-    "Which country has the most population?"
-    "Who was the first female Prime Minister of the UK?"
-    "Which is the brightest star in the night sky?"
-    "What is the smallest planet in the Solar System?"
 )
 
 # Function to get a random GK question
@@ -89,7 +44,7 @@ send_request() {
     local message="$1"
     local api_key="$2"
 
-    echo "📩 Sending Question: $message"  # Show question before sending
+    echo "📩 Sending Question: $message"
 
     json_data=$(cat <<EOF
 {
@@ -113,7 +68,7 @@ EOF
     if [[ "$http_status" -eq 200 ]]; then
         response_message=$(echo "$body" | jq -r '.choices[0].message.content')
         ((success_count++))  # Increment success count
-        echo "✅ [SUCCESS] Response #$success_count Received!"
+        echo "✅ [SUCCESS] Response $success_count Received!"
         echo "📝 Question: $message"
         echo "💬 Response: $response_message"
     else
