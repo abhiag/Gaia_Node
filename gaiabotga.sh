@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Predefined domain URL (Hidden from users)
-API_URL="https://your-predefined-api.com/v1/chat"
+API_URL="https://hyper.gaia.domains/v1/chat/completions"
 
 # Function to handle the API request
 send_request() {
