@@ -51,7 +51,7 @@ EOF
             echo "$body" | jq . > /dev/null 2>&1
             if [ $? -eq 0 ]; then
                 response_message=$(echo "$body" | jq -r '.choices[0].message.content')
-                echo "✅ [SUCCESS] Message sent successfully."
+                echo "✅ [SUCCESS] Message sent successfully to GPU Domain."
                 echo "Question: $message"
                 echo "Response: $response_message"
                 break  # Exit loop if request was successful
