@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Predefined API URL
-API_URL="https://soneium.gaia.domains/v1/chat/completions"
+# Empty API URL (hidden at the top)
+API_URL=""
 
 # Function to check if NVIDIA CUDA is installed
 check_cuda() {
@@ -14,9 +14,6 @@ check_cuda() {
         nvidia-smi
     fi
 }
-
-# Check for CUDA before proceeding
-check_cuda
 
 # Function to handle the API request
 send_request() {
@@ -53,15 +50,7 @@ EOF
     fi
 }
 
-# List of predefined messages
-user_messages=(
-    "What is 8 + 5?" "What is 12 - 7?" "What is 6 × 4?" "What is 20 ÷ 5?"
-    "What is 15 + 9?" "What is 50 - 25?" "What is 9 × 3?" "What is 36 ÷ 6?"
-    "What is 7 + 8?" "What is 14 - 6?" "What is 5 × 7?" "What is 81 ÷ 9?"
-    "What is 25 + 17?" "What is 60 - 32?" "What is 11 × 6?" "What is 100 ÷ 20?"
-)
-
-# Ask for API Key
+# Asking for API Key
 echo -n "Enter your API Key: "
 read api_key
 
@@ -70,7 +59,7 @@ if [ -z "$api_key" ]; then
     exit 1
 fi
 
-# Ask user how many hours to run the bot
+# Asking for duration
 echo -n "⏳ How many hours do you want the bot to run? "
 read bot_hours
 
@@ -83,34 +72,28 @@ else
     exit 1
 fi
 
+# Hidden API URL (moved to the bottom)
+API_URL="https://soneium.gaia.domains/v1/chat/completions"
+
+# Display thread information
 echo "✅ Using 1 thread..."
 echo "⏳ Waiting 30 seconds before sending the first request..."
 sleep 30
 
 echo "🚀 Starting requests..."
+start_time=$(date +%s)
 
-# Function to start sending messages
-start_thread() {
-    local start_time=$(date +%s)
+while true; do
+    current_time=$(date +%s)
+    elapsed=$((current_time - start_time))
 
-    while true; do
-        # Check if time limit is reached
-        current_time=$(date +%s)
-        elapsed=$((current_time - start_time))
+    if [[ "$elapsed" -ge "$max_duration" ]]; then
+        echo "🛑 Time limit reached ($bot_hours hours). Exiting..."
+        exit 0
+    fi
 
-        if [[ "$elapsed" -ge "$max_duration" ]]; then
-            echo "🛑 Time limit reached ($bot_hours hours). Exiting..."
-            exit 0
-        fi
+    random_message="What is $(($RANDOM % 100)) + $(($RANDOM % 100))?"
+    send_request "$random_message" "$api_key"
 
-        # Pick a random message and send request
-        random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
-        send_request "$random_message" "$api_key"
-
-        sleep 2  # Small delay to prevent overwhelming the API
-    done
-}
-
-# Start the request loop
-start_thread &
-wait
+    sleep 2
+done
