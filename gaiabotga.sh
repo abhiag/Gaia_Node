@@ -1,12 +1,16 @@
 #!/bin/bash
 
-# Function to send the API request
+# Predefined domain URL (Hidden from users)
+API_URL="https://your-predefined-api.com/v1/chat"
+
+# Function to handle the API request
 send_request() {
     local message="$1"
     local api_key="$2"
-    local api_url="https://hyper.gaia.domains/v1/chat/completions"
 
-    json_data=$(cat <<EOF
+    while true; do
+        # Prepare the JSON payload
+        json_data=$(cat <<EOF
 {
     "messages": [
         {"role": "system", "content": "You are a helpful assistant."},
@@ -14,28 +18,45 @@ send_request() {
     ]
 }
 EOF
-    )
+        )
 
-    response=$(curl -s -w "\n%{http_code}" -X POST "$api_url" \
-        -H "Authorization: Bearer $api_key" \
-        -H "Accept: application/json" \
-        -H "Content-Type: application/json" \
-        -d "$json_data")
+        # Send the request using curl and capture both the response and status code
+        response=$(curl -s -w "\n%{http_code}" -X POST "$API_URL" \
+            -H "Authorization: Bearer $api_key" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/json" \
+            -d "$json_data")
 
-    http_status=$(echo "$response" | tail -n1)
-    body=$(echo "$response" | head -n -1)
+        # Extract the HTTP status code from the response
+        http_status=$(echo "$response" | tail -n 1)
+        body=$(echo "$response" | head -n -1)
 
-    if [[ "$http_status" -eq 200 ]]; then
-        response_message=$(echo "$body" | jq -r '.choices[0].message.content')
-        echo "✅ [SUCCESS] Request sent successfully!"
-        echo "🔹 Question: $message"
-        echo "🔸 Response: $response_message"
-    else
-        echo "⚠️ [ERROR] Request failed | Status: $http_status"
-    fi
+        if [[ "$http_status" -eq 200 ]]; then
+            # Check if the response is valid JSON
+            echo "$body" | jq . > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                # Print the question and response content
+                echo "✅ [SUCCESS] Message: '$message'"
+
+                # Extract the response message from the JSON
+                response_message=$(echo "$body" | jq -r '.choices[0].message.content')
+                
+                # Print both the question and the response
+                echo "Question: $message"
+                echo "Response: $response_message"
+                break  # Exit loop if request was successful
+            else
+                echo "⚠️ [ERROR] Invalid JSON response!"
+                echo "Response Text: $body"
+            fi
+        else
+            echo "⚠️ [ERROR] Status: $http_status | Retrying..."
+            sleep 2
+        fi
+    done
 }
 
-# List of math-related messages
+# Define a list of predefined messages
 user_messages=(
     "What is 8 + 5?"
     "What is 12 - 7?"
@@ -69,28 +90,37 @@ user_messages=(
     "What is 98 - 56?"
 )
 
-# Prompt for API Key (hidden input)
-read -rsp "🔑 Enter your API Key: " api_key
-echo ""
+# Ask the user to input API Key
+echo -n "Enter your API Key: "
+read api_key
 
-# Validate API Key
-if [[ -z "$api_key" ]]; then
-    echo "❌ Error: API Key is required!"
+# Exit if the API Key is empty
+if [ -z "$api_key" ]; then
+    echo "Error: API Key is required!"
     exit 1
 fi
 
-echo "✅ Connection initialized successfully!"
+# 1-minute delay before sending the first request
+echo "⏳ Waiting 1 minute before sending the first request..."
+sleep 60
 
-# Initial delay before sending the first request (1-2 minutes)
-initial_wait=$((60 + RANDOM % 61))
-echo "⏳ Waiting $initial_wait seconds before sending the first request..."
-sleep $initial_wait
+# Function to run the single thread
+start_thread() {
+    while true; do
+        # Pick a random message from the predefined list
+        random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
+        send_request "$random_message" "$api_key"
 
-# Loop through messages with a 20-second delay between requests
-for message in "${user_messages[@]}"; do
-    echo "⏳ Waiting 20 seconds before sending next request..."
-    sleep 20
-    send_request "$message" "$api_key"
-done
+        # 20-second delay between each message request
+        sleep 20
+    done
+}
 
-echo "✅ Script execution complete."
+# Start the single thread
+start_thread &
+
+# Wait for the thread to finish (this will run indefinitely)
+wait
+
+# Graceful exit handling (SIGINT, SIGTERM)
+trap "echo -e '\n🛑 Process terminated. Exiting gracefully...'; exit 0" SIGINT SIGTERM
