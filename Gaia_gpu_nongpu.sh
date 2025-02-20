@@ -34,6 +34,7 @@ RESET="\033[0m"
 # Ensure required packages are installed
 echo "📦 Installing dependencies..."
 sudo apt update -y && sudo apt install -y pciutils libgomp1 curl wget
+sudo apt update && sudo apt install -y build-essential libglvnd-dev pkg-config
 
 # Function to check if an NVIDIA GPU is present
 check_nvidia_gpu() {
@@ -52,7 +53,8 @@ check_nvidia_gpu() {
 # Function to check CUDA version
 get_cuda_version() {
     if command -v nvcc &> /dev/null; then
-        echo "✅ CUDA version detected: $(nvcc --version | grep 'release' | awk '{print $6}' | cut -d',' -f1)"
+        CUDA_VERSION=$(nvcc --version | grep 'release' | awk '{print $6}' | cut -d',' -f1)
+        echo "✅ CUDA version detected: $CUDA_VERSION"
         return 0
     else
         echo "⚠️ CUDA not found. Installing CUDA Toolkit 12.8..."
@@ -60,15 +62,27 @@ get_cuda_version() {
     fi
 }
 
-# Function to install CUDA Toolkit 12.8
+# Function to install CUDA Toolkit 12.8 with error handling
 install_cuda() {
-    echo "📥 Adding NVIDIA GPG Key and CUDA repository..."
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.0-1_all.deb
-    sudo dpkg -i cuda-keyring_1.0-1_all.deb
-    
-    sudo apt update
-    echo "📥 Installing CUDA Toolkit 12.8..."
-    sudo apt install -y cuda-toolkit-12-8
+    if grep -qi microsoft /proc/version; then
+        echo "🖥️ Running inside WSL. Attempting CUDA installation via APT..."
+        sudo apt update && sudo apt install -y cuda-toolkit-12-8
+
+        # Check if APT installation succeeded
+        if command -v nvcc &> /dev/null; then
+            echo "✅ CUDA successfully installed via APT."
+            setup_cuda_env
+            return 0
+        else
+            echo "❌ APT installation failed! Falling back to .run installer..."
+        fi
+    fi
+
+    echo "📥 Downloading CUDA Toolkit 12.8 installer..."
+    wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda_12.8.0_570.86.10_linux.run
+
+    echo "📥 Starting CUDA Toolkit 12.8 installation (without drivers)..."
+    sudo sh cuda_12.8.0_570.86.10_linux.run --toolkit --override
 
     # Verify CUDA installation
     if command -v nvcc &> /dev/null; then
@@ -83,20 +97,31 @@ install_cuda() {
 # Function to set up environment variables
 setup_cuda_env() {
     echo "🔧 Setting up CUDA environment variables..."
-    echo 'export PATH=/usr/local/cuda/bin:$PATH' >> ~/.bashrc
-    echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH' >> ~/.bashrc
+    if ! grep -q 'export PATH=/usr/local/cuda/bin:$PATH' ~/.bashrc; then
+        echo 'export PATH=/usr/local/cuda/bin:$PATH' >> ~/.bashrc
+    fi
+    if ! grep -q 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH' ~/.bashrc; then
+        echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH' >> ~/.bashrc
+    fi
     source ~/.bashrc
 }
 
-# Main Execution Flow
-check_nvidia_gpu || exit 1  # Exit if no NVIDIA GPU is found
-get_cuda_version || exit 1  # Exit if CUDA is not properly installed
-
 # Function to install GaiaNet
 install_gaianet() {
-    echo "📥 Installing GaiaNet node..."
-    curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --ggmlcuda 12 || { echo "❌ GaiaNet installation failed!"; exit 1; }
-    echo "✅ GaiaNet node installation successful!"
+    if check_nvidia_gpu; then
+        echo "📥 Installing GaiaNet node with CUDA support..."
+        curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --ggmlcuda 12
+    else
+        echo "📥 Installing GaiaNet node without CUDA..."
+        curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+    fi
+
+    if [ $? -eq 0 ]; then
+        echo "✅ GaiaNet node installation successful!"
+    else
+        echo "❌ GaiaNet installation failed!"
+        exit 1
+    fi
 }
 
 # Function to add GaiaNet binary to PATH
