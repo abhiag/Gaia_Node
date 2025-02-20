@@ -36,7 +36,7 @@ EOF
             echo "$body" | jq . > /dev/null 2>&1
             if [ $? -eq 0 ]; then
                 # Print the question and response content
-                echo "✅ [SUCCESS] Message: '$message'"
+                echo "✅ [SUCCESS] Message Sent Successfully to Non-GPU Domain: '$message'"
 
                 # Extract the response message from the JSON
                 response_message=$(echo "$body" | jq -r '.choices[0].message.content')
