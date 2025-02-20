@@ -4,7 +4,7 @@
 send_request() {
     local message="$1"
     local api_key="$2"
-    local api_url="https://gacrypto.gaia.domains/v1/chat/completions"
+    local api_url="https://hyper.gaia.domains/v1/chat/completions"
 
     json_data=$(cat <<EOF
 {
@@ -35,7 +35,7 @@ EOF
     fi
 }
 
-# New list of math-related messages
+# List of math-related messages
 user_messages=(
     "What is 8 + 5?"
     "What is 12 - 7?"
@@ -81,15 +81,16 @@ fi
 
 echo "✅ Connection initialized successfully!"
 
-# Random delay before sending the request (1-2 minutes)
+# Initial delay before sending the first request (1-2 minutes)
 initial_wait=$((60 + RANDOM % 61))
-echo "⏳ Preparing request... (Waiting for $initial_wait seconds)"
-sleep "$initial_wait"
+echo "⏳ Waiting $initial_wait seconds before sending the first request..."
+sleep $initial_wait
 
-# Pick a random message
-random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
-
-# Send the request
-send_request "$random_message" "$api_key"
+# Loop through messages with a 20-second delay between requests
+for message in "${user_messages[@]}"; do
+    echo "⏳ Waiting 20 seconds before sending next request..."
+    sleep 20
+    send_request "$message" "$api_key"
+done
 
 echo "✅ Script execution complete."
