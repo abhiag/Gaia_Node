@@ -66,7 +66,7 @@ get_cuda_version() {
 install_cuda() {
     if grep -qi microsoft /proc/version; then
         echo "🖥️ Running inside WSL. Attempting CUDA installation via APT..."
-        sudo apt update && sudo apt install -y cuda-toolkit-12-8
+        sudo apt update && sudo apt install -y nvidia-cuda-toolkit
 
         # Check if APT installation succeeded
         if command -v nvcc &> /dev/null; then
