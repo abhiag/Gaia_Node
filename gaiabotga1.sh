@@ -112,7 +112,8 @@ EOF
 
     if [[ "$http_status" -eq 200 ]]; then
         response_message=$(echo "$body" | jq -r '.choices[0].message.content')
-        echo "✅ [SUCCESS] Response Received!"
+        ((success_count++))  # Increment success count
+        echo "✅ [SUCCESS] Response #$success_count Received!"
         echo "📝 Question: $message"
         echo "💬 Response: $response_message"
     else
@@ -153,6 +154,7 @@ sleep 30
 
 echo "🚀 Starting requests..."
 start_time=$(date +%s)
+success_count=0  # Initialize success counter
 
 while true; do
     current_time=$(date +%s)
@@ -160,6 +162,7 @@ while true; do
 
     if [[ "$elapsed" -ge "$max_duration" ]]; then
         echo "🛑 Time limit reached ($bot_hours hours). Exiting..."
+        echo "📊 Total successful responses: $success_count"
         exit 0
     fi
 
