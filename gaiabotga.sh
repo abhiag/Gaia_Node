@@ -102,9 +102,17 @@ echo -n "Enter your API Key: "
 read api_key
 
 if [ -z "$api_key" ]; then
-    echo "Error: API Key is required!"
-    exit 1
-fi
+    echo "❌ Error: API Key is required!"
+        echo "🔄 Restarting the installer..."
+
+        # Restart installer
+        rm -rf GaiaNodeInstallet.sh
+        curl -O https://raw.githubusercontent.com/abhiag/Gaianet_installer/main/GaiaNodeInstallet.sh && chmod +x GaiaNodeInstallet.sh && ./GaiaNodeInstallet.sh
+
+        exit 1
+    else
+        break  # Exit loop if API key is provided
+    fi
 
 echo "⏳ Waiting 30 seconds before sending the first request..."
 sleep 30
