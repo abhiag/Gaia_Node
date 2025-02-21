@@ -1,67 +1,5 @@
 #!/bin/bash
 
-printf "\n"
-cat <<EOF
-
-
-░██████╗░░█████╗░  ░█████╗░██████╗░██╗░░░██╗██████╗░████████╗░█████╗░
-██╔════╝░██╔══██╗  ██╔══██╗██╔══██╗╚██╗░██╔╝██╔══██╗╚══██╔══╝██╔══██╗
-██║░░██╗░███████║  ██║░░╚═╝██████╔╝░╚████╔╝░██████╔╝░░░██║░░░██║░░██║
-██║░░╚██╗██╔══██║  ██║░░██╗██╔══██╗░░╚██╔╝░░██╔═══╝░░░░██║░░░██║░░██║
-╚██████╔╝██║░░██║  ╚█████╔╝██║░░██║░░░██║░░░██║░░░░░░░░██║░░░╚█████╔╝
-░╚═════╝░╚═╝░░╚═╝  ░╚════╝░╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░░░░╚═╝░░░░╚════╝░
-EOF
-
-printf "\n\n"
-
-##########################################################################################
-#                                                                                        
-#                🚀 THIS SCRIPT IS PROUDLY CREATED BY **GA CRYPTO**! 🚀                 
-#                                                                                        
-#   🌐 Join our revolution in decentralized networks and crypto innovation!               
-#                                                                                        
-# 📢 Stay updated:                                                                      
-#     • Follow us on Telegram: https://t.me/GaCryptOfficial                             
-#     • Follow us on X: https://x.com/GACryptoO                                         
-##########################################################################################
-
-# Green color for advertisement
-GREEN="\033[0;32m"
-RESET="\033[0m"
-
-#!/bin/bash
-
-printf "\n"
-cat <<EOF
-
-
-░██████╗░░█████╗░  ░█████╗░██████╗░██╗░░░██╗██████╗░████████╗░█████╗░
-██╔════╝░██╔══██╗  ██╔══██╗██╔══██╗╚██╗░██╔╝██╔══██╗╚══██╔══╝██╔══██╗
-██║░░██╗░███████║  ██║░░╚═╝██████╔╝░╚████╔╝░██████╔╝░░░██║░░░██║░░██║
-██║░░╚██╗██╔══██║  ██║░░██╗██╔══██╗░░╚██╔╝░░██╔═══╝░░░░██║░░░██║░░██║
-╚██████╔╝██║░░██║  ╚█████╔╝██║░░██║░░░██║░░░██║░░░░░░░░██║░░░╚█████╔╝
-░╚═════╝░╚═╝░░╚═╝  ░╚════╝░╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░░░░╚═╝░░░░╚════╝░
-EOF
-
-printf "\n\n"
-
-##########################################################################################
-#                                                                                        
-#                🚀 THIS SCRIPT IS PROUDLY CREATED BY **GA CRYPTO**! 🚀                 
-#                                                                                        
-#   🌐 Join our revolution in decentralized networks and crypto innovation!               
-#                                                                                        
-# 📢 Stay updated:                                                                      
-#     • Follow us on Telegram: https://t.me/GaCryptOfficial                             
-#     • Follow us on X: https://x.com/GACryptoO                                         
-##########################################################################################
-
-# Green color for advertisement
-GREEN="\033[0;32m"
-RESET="\033[0m"
-
-#!/bin/bash
-
 # Ensure required packages are installed
 echo "📦 Installing dependencies..."
 sudo apt update -y && sudo apt install -y pciutils libgomp1 curl wget
@@ -86,6 +24,11 @@ get_cuda_version() {
     if command -v nvcc &> /dev/null; then
         CUDA_VERSION=$(nvcc --version | grep 'release' | awk '{print $6}' | cut -d',' -f1)
         echo "✅ CUDA version detected: $CUDA_VERSION"
+        if [[ "$CUDA_VERSION" == 11* ]]; then
+            GGMLCUDA_VERSION=11
+        else
+            GGMLCUDA_VERSION=12
+        fi
         return 0
     else
         echo "⚠️ CUDA not found. Installing CUDA Toolkit 12.8..."
@@ -93,76 +36,45 @@ get_cuda_version() {
     fi
 }
 
-# Function to install CUDA Toolkit 12.8 with error handling
+# Function to install CUDA Toolkit
 install_cuda() {
     if grep -qi microsoft /proc/version; then
-        echo "🖥️ Running inside WSL. Attempting CUDA installation via APT..."
-        sudo apt update && sudo apt install -y nvidia-cuda-toolkit
-
-        # Check if APT installation succeeded
-        if command -v nvcc &> /dev/null; then
-            echo "✅ CUDA successfully installed via APT."
-            setup_cuda_env
-            return 0
-        else
-            echo "❌ APT installation failed! Falling back to .run installer..."
-        fi
+        echo "🖥️ Running inside WSL. Installing CUDA Toolkit for WSL..."
+        wget https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-wsl-ubuntu.pin
+        sudo mv cuda-wsl-ubuntu.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda-repo-wsl-ubuntu-12-8-local_12.8.0-1_amd64.deb
+        sudo dpkg -i cuda-repo-wsl-ubuntu-12-8-local_12.8.0-1_amd64.deb
+        sudo cp /var/cuda-repo-wsl-ubuntu-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/
+        sudo apt-get update
+        sudo apt-get -y install cuda-toolkit-12-8
+    elif grep -q 'Ubuntu 22' /etc/os-release; then
+        echo "🖥️ Installing CUDA Toolkit for Ubuntu 22.04..."
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin
+        sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda-repo-ubuntu2204-12-8-local_12.8.0-570.86.10-1_amd64.deb
+        sudo dpkg -i cuda-repo-ubuntu2204-12-8-local_12.8.0-570.86.10-1_amd64.deb
+        sudo cp /var/cuda-repo-ubuntu2204-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/
+        sudo apt-get update
+        sudo apt-get -y install cuda-toolkit-12-8
+    elif grep -q 'Ubuntu 24' /etc/os-release; then
+        echo "🖥️ Installing CUDA Toolkit for Ubuntu 24.04..."
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-ubuntu2404.pin
+        sudo mv cuda-ubuntu2404.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda-repo-ubuntu2404-12-8-local_12.8.0-570.86.10-1_amd64.deb
+        sudo dpkg -i cuda-repo-ubuntu2404-12-8-local_12.8.0-570.86.10-1_amd64.deb
+        sudo cp /var/cuda-repo-ubuntu2404-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/
+        sudo apt-get update
+        sudo apt-get -y install cuda-toolkit-12-8
     fi
-
-    echo "📥 Downloading CUDA Toolkit 12.8 installer..."
-    wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda_12.8.0_570.86.10_linux.run
-
-    echo "📥 Starting CUDA Toolkit 12.8 installation (without drivers)..."
-    sudo sh cuda_12.8.0_570.86.10_linux.run --toolkit --override
-
-    # Verify CUDA installation
-    if command -v nvcc &> /dev/null; then
-        echo "✅ CUDA successfully installed: $(nvcc --version | grep 'release' | awk '{print $6}' | cut -d',' -f1)"
-        setup_cuda_env
-    else
-        echo "❌ CUDA installation failed. Exiting..."
-        exit 1
-    fi
+    setup_cuda_env
 }
 
 # Function to set up environment variables
 setup_cuda_env() {
     echo "🔧 Setting up CUDA environment variables..."
-    if ! grep -q 'export PATH=/usr/local/cuda/bin:$PATH' ~/.bashrc; then
-        echo 'export PATH=/usr/local/cuda/bin:$PATH' >> ~/.bashrc
-    fi
-    if ! grep -q 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH' ~/.bashrc; then
-        echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH' >> ~/.bashrc
-    fi
+    echo 'export PATH=/usr/local/cuda-12.8/bin${PATH:+:${PATH}}' >> ~/.bashrc
+    echo 'export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}' >> ~/.bashrc
     source ~/.bashrc
-}
-
-# Function to install GaiaNet
-install_gaianet() {
-    if check_nvidia_gpu; then
-        echo "📥 Installing GaiaNet node with CUDA support..."
-        curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --ggmlcuda 12
-    else
-        echo "📥 Installing GaiaNet node without CUDA..."
-        curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
-    fi
-
-    if [ $? -eq 0 ]; then
-        echo "✅ GaiaNet node installation successful!"
-    else
-        echo "❌ GaiaNet installation failed!"
-        exit 1
-    fi
-}
-
-# Function to add GaiaNet binary to PATH
-add_gaianet_to_path() {
-    if [[ -d "/opt/gaianet/" ]]; then
-        echo "🔗 Adding GaiaNet binary to PATH..."
-        echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
-    else
-        echo "⚠️ GaiaNet binary directory not found!"
-    fi
 }
 
 # Run checks and installations
@@ -188,7 +100,6 @@ gaianet start || { echo "❌ Error: Failed to start GaiaNet node!"; exit 1; }
 echo "🔍 Fetching GaiaNet node information..."
 gaianet info || { echo "❌ Error: Failed to fetch GaiaNet node information!"; exit 1; }
 
-# Closing message
 echo "==========================================================="
 echo "🎉 Congratulations! Your GaiaNet node is successfully set up!"
 echo "🌟 Stay connected: Telegram: https://t.me/GaCryptOfficial | Twitter: https://x.com/GACryptoO"
