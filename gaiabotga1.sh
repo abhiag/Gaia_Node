@@ -20,6 +20,20 @@ check_cuda() {
 # Run the check
 check_cuda
 
+# Check if jq is installed, and if not, install it
+if ! command -v jq &> /dev/null; then
+    echo "❌ jq not found. Installing jq..."
+    sudo apt update && sudo apt install jq -y
+    if [ $? -eq 0 ]; then
+        echo "✅ jq installed successfully!"
+    else
+        echo "❌ Failed to install jq. Please install jq manually and re-run the script."
+        exit 1
+    fi
+else
+    echo "✅ jq is already installed."
+fi
+
 # List of general questions
 general_questions=( 
     "What are the benefits of drinking enough water every day?"
