@@ -10,10 +10,7 @@ check_cuda() {
         read -r  # Waits for user input
 
         # Remove old script, download and execute new one
-        rm -rf GaiaNodeInstallet.sh 
-        curl -O https://raw.githubusercontent.com/abhiag/Gaianet_installer/main/GaiaNodeInstallet.sh
-        chmod +x GaiaNodeInstallet.sh
-        ./GaiaNodeInstallet.sh
+ 
 
         exit 1
     fi
