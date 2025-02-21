@@ -101,8 +101,11 @@ EOF
     http_status=$(echo "$response" | tail -n 1)
     body=$(echo "$response" | head -n -1)
 
+    # Debugging: Print the entire raw response for inspection
+    echo "📊 Full Response: $body"
+
     if [[ "$http_status" -eq 200 ]]; then
-        response_message=$(echo "$body" | jq -r '.choices[0].message.content')
+        response_message=$(echo "$body")  # Raw response instead of using jq
         ((success_count++))  # Increment success count
         echo "✅ [SUCCESS] Response $success_count Received!"
         echo "📝 Question: $message"
@@ -121,7 +124,7 @@ while true; do
     if [ -z "$api_key" ]; then
         echo "❌ Error: API Key is required!"
         echo "🔄 Restarting the installer..."
-        
+
         # Restart installer
         rm -rf GaiaNodeInstallet.sh
         curl -O https://raw.githubusercontent.com/abhiag/Gaianet_installer/main/GaiaNodeInstallet.sh && chmod +x GaiaNodeInstallet.sh && ./GaiaNodeInstallet.sh
