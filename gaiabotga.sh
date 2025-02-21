@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Function to check if NVIDIA CUDA is installed
-if command -v nvcc &> /dev/null && command -v nvidia-smi &> /dev/null; then
-    echo "❌ NVIDIA CUDA detected! This script is for non-GPU users only."
+if command -v nvidia-smi &> /dev/null && nvidia-smi -L &> /dev/null; then
+    echo "❌ NVIDIA GPU detected! This script is for non-GPU users only."
     exit 1
 fi
 
-echo "✅ No NVIDIA CUDA detected. Proceeding with the script..."
+echo "✅ No NVIDIA GPU detected. Proceeding with the script..."
 
 # Hidden API domain (not displayed to users)
 API_URL="https://hyper.gaia.domains/v1/chat/completions"
