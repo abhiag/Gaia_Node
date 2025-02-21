@@ -89,7 +89,7 @@ install_gaianet() {
 
 # Function to add GaiaNet to PATH
 add_gaianet_to_path() {
-    echo 'export PATH=$HOME/.gaianet/bin:$PATH' >> ~/.bashrc
+    echo 'export PATH=$HOME/gaianet/bin:$PATH' >> ~/.bashrc
     source ~/.bashrc
 }
 
@@ -110,11 +110,11 @@ fi
 
 # Start GaiaNet node
 echo "🚀 Starting GaiaNet node..."
-~/.gaianet/bin/gaianet config --domain gaia.domains
-~/.gaianet/bin/gaianet start || { echo "❌ Error: Failed to start GaiaNet node!"; exit 1; }
+~/gaianet/bin/gaianet config --domain gaia.domains
+~/gaianet/bin/gaianet start || { echo "❌ Error: Failed to start GaiaNet node!"; exit 1; }
 
 echo "🔍 Fetching GaiaNet node information..."
-~/.gaianet/bin/gaianet info || { echo "❌ Error: Failed to fetch GaiaNet node information!"; exit 1; }
+~/gaianet/bin/gaianet info || { echo "❌ Error: Failed to fetch GaiaNet node information!"; exit 1; }
 
 # Closing message
 echo "==========================================================="
