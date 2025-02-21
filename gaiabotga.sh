@@ -1,12 +1,18 @@
 #!/bin/bash
 
 # Function to check if NVIDIA CUDA is installed
-if command -v nvidia-smi &> /dev/null && nvidia-smi -L &> /dev/null; then
-    echo "❌ NVIDIA GPU detected! This script is for non-GPU users only."
-    exit 1
-fi
+check_cuda() {
+    if command -v nvcc &> /dev/null; then
+        cuda_version=$(nvcc --version | grep "release" | awk '{print $6}' | tr -d ",")
+        echo "❌ NVIDIA CUDA detected (Version: $cuda_version)! This script is for non-GPU users only."
+        exit 1
+    fi
+}
 
-echo "✅ No NVIDIA GPU detected. Proceeding with the script..."
+# Run the check
+check_cuda
+
+echo "✅ No NVIDIA CUDA detected. Proceeding with the script..."
 
 # Hidden API domain (not displayed to users)
 API_URL="https://hyper.gaia.domains/v1/chat/completions"
@@ -15,9 +21,9 @@ API_URL="https://hyper.gaia.domains/v1/chat/completions"
 generate_random_math_question() {
     local num1=$((RANDOM % 100))
     local num2=$((RANDOM % 100))
-    local operators=("+ - * ÷")
-    local operator=($operators)
-    echo "What is $num1 ${operator[RANDOM % ${#operator[@]}]} $num2?"
+    local operators=("+" "-" "*" "÷")
+    local operator=${operators[RANDOM % ${#operators[@]}]}
+    echo "What is $num1 $operator $num2?"
 }
 
 # Function to generate a random general knowledge question
