@@ -24,10 +24,10 @@ get_cuda_version() {
     if command -v nvcc &> /dev/null; then
         CUDA_VERSION=$(nvcc --version | grep 'release' | awk '{print $6}' | cut -d',' -f1)
         echo "✅ CUDA version detected: $CUDA_VERSION"
-        if [[ "$CUDA_VERSION" == 11* ]]; then
-            GGMLCUDA_VERSION=11
-        else
-            GGMLCUDA_VERSION=12
+        if [[ "$CUDA_VERSION" =~ ^11 ]]; then
+            curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --ggmlcuda 11
+        elif [[ "$CUDA_VERSION" =~ ^12 ]]; then
+            curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --ggmlcuda 12
         fi
         return 0
     else
@@ -39,7 +39,7 @@ get_cuda_version() {
 # Function to install CUDA Toolkit
 install_cuda() {
     if grep -qi microsoft /proc/version; then
-        echo "🖥️ Running inside WSL. Installing CUDA Toolkit for WSL..."
+        echo "🖥️ Running inside WSL. Installing CUDA via APT..."
         wget https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-wsl-ubuntu.pin
         sudo mv cuda-wsl-ubuntu.pin /etc/apt/preferences.d/cuda-repository-pin-600
         wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda-repo-wsl-ubuntu-12-8-local_12.8.0-1_amd64.deb
@@ -47,8 +47,8 @@ install_cuda() {
         sudo cp /var/cuda-repo-wsl-ubuntu-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/
         sudo apt-get update
         sudo apt-get -y install cuda-toolkit-12-8
-    elif grep -q 'Ubuntu 22' /etc/os-release; then
-        echo "🖥️ Installing CUDA Toolkit for Ubuntu 22.04..."
+    elif grep -q 'Ubuntu 22.04' /etc/os-release; then
+        echo "📥 Installing CUDA Toolkit for Ubuntu 22.04..."
         wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin
         sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600
         wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda-repo-ubuntu2204-12-8-local_12.8.0-570.86.10-1_amd64.deb
@@ -56,8 +56,8 @@ install_cuda() {
         sudo cp /var/cuda-repo-ubuntu2204-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/
         sudo apt-get update
         sudo apt-get -y install cuda-toolkit-12-8
-    elif grep -q 'Ubuntu 24' /etc/os-release; then
-        echo "🖥️ Installing CUDA Toolkit for Ubuntu 24.04..."
+    elif grep -q 'Ubuntu 24.04' /etc/os-release; then
+        echo "📥 Installing CUDA Toolkit for Ubuntu 24.04..."
         wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-ubuntu2404.pin
         sudo mv cuda-ubuntu2404.pin /etc/apt/preferences.d/cuda-repository-pin-600
         wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda-repo-ubuntu2404-12-8-local_12.8.0-570.86.10-1_amd64.deb
@@ -65,6 +65,9 @@ install_cuda() {
         sudo cp /var/cuda-repo-ubuntu2404-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/
         sudo apt-get update
         sudo apt-get -y install cuda-toolkit-12-8
+    else
+        echo "❌ Unsupported OS version. Exiting..."
+        exit 1
     fi
     setup_cuda_env
 }
@@ -100,6 +103,7 @@ gaianet start || { echo "❌ Error: Failed to start GaiaNet node!"; exit 1; }
 echo "🔍 Fetching GaiaNet node information..."
 gaianet info || { echo "❌ Error: Failed to fetch GaiaNet node information!"; exit 1; }
 
+# Closing message
 echo "==========================================================="
 echo "🎉 Congratulations! Your GaiaNet node is successfully set up!"
 echo "🌟 Stay connected: Telegram: https://t.me/GaCryptOfficial | Twitter: https://x.com/GACryptoO"
