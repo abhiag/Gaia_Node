@@ -1,72 +1,91 @@
 #!/bin/bash
 
-# Check for NVIDIA GPU presence
-gpu_count=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | wc -l)
-cuda_check=$(command -v nvcc)
+echo "🔍 Checking for NVIDIA GPU with CUDA support..."
 
+# Check if nvidia-smi is installed
+if ! command -v nvidia-smi &> /dev/null; then
+    echo "❌ NVIDIA GPU Not Found. This Bot is Only for GPU Users."
+    read -p "Press Enter to go back..."
+    exit 1
+fi
+
+# Check if CUDA (nvcc) is installed
+cuda_check=$(command -v nvcc)
+gpu_count=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
+
+# Debugging information
+echo "🔎 CUDA Check: ${cuda_check:-Not Found}"
+echo "🎮 GPU Count: $gpu_count"
+
+# Final check for both GPU and CUDA
 if [[ -z "$cuda_check" || "$gpu_count" -eq 0 ]]; then
-    echo "❌ No NVIDIA GPU with CUDA detected. This script is only for GPU users."
+    echo "❌ NVIDIA GPU Not Found. This Bot is Only for GPU Users."
+    read -p "Press Enter to go back..."
     exit 1
 fi
 
 echo "✅ NVIDIA GPU with CUDA detected. Proceeding with execution..."
 
+# Remove old installer and download the latest one
+rm -rf GaiaNodeInstallet.sh
+curl -O https://raw.githubusercontent.com/abhiag/Gaianet_installer/main/GaiaNodeInstallet.sh && chmod +x GaiaNodeInstallet.sh && ./GaiaNodeInstallet.sh
+
 # Hidden API URL (moved to the bottom)
 API_URL=""
 
-# Function to generate a fully random math question
-generate_random_math_question() {
-    num1=$((RANDOM % 100))
-    num2=$((RANDOM % 100 + 1))  # Avoid division by zero
-    operator=$((RANDOM % 4))    # 0 = +, 1 = -, 2 = ×, 3 = ÷
-
-    case $operator in
-        0) question="What is $num1 + $num2?" ;;
-        1) question="What is $num1 - $num2?" ;;
-        2) question="What is $num1 × $num2?" ;;
-        3) question="What is $((num1 * num2)) ÷ $num2?" ;; # Ensures whole number result
-    esac
-
-    echo "$question"
-}
-
-# List of predefined GK questions
-gk_questions=(
-    "What is the capital of France?"
-    "Who wrote 'Romeo and Juliet'?"
-    "What is the largest planet in our Solar System?"
-    "Who painted the Mona Lisa?"
-    "What is the chemical symbol for gold?"
-    "Who was the first President of the United States?"
-    "What is the longest river in the world?"
-    "Who discovered gravity?"
-    "Which is the tallest mountain in the world?"
-    "What is the hardest natural substance on Earth?"
-    "What is the boiling point of water in Celsius?"
-    "Which continent is known as the 'Dark Continent'?"
-    "What is the smallest country in the world?"
-    "Who invented the telephone?"
-    "Which ocean is the largest?"
-    "What is the name of the first man to walk on the moon?"
-    "What is the national bird of the United States?"
-    "Who discovered penicillin?"
-    "Which gas do plants absorb from the atmosphere?"
-    "What is the capital of Japan?"
-    "How many bones are there in the human body?"
-    "Which country gifted the Statue of Liberty to the USA?"
-    "Which is the largest desert in the world?"
-    "Who wrote 'The Theory of Relativity'?"
-    "Which element has the chemical symbol 'O'?"
-    "What is the square root of 144?"
-    "Who was the first woman to win a Nobel Prize?"
-    "Which planet is known as the Red Planet?"
-    "Who composed 'Fur Elise'?"
-    "How many continents are there on Earth?"
+# List of general questions
+general_questions=(
+    "What are the benefits of drinking enough water every day?"
+    "How does the human brain store memories?"
+    "What is the Milky Way galaxy and how big is it?"
+    "How do black holes form?"
+    "What are the fundamental principles of object-oriented programming?"
+    "How does intermittent fasting impact the body?"
+    "What is the role of the International Space Station?"
+    "Why do we experience jet lag?"
+    "What are the key differences between Python and Java?"
+    "How does the immune system fight infections?"
+    "What is the speed of light and why is it important?"
+    "How does machine learning work?"
+    "What are the advantages of a morning routine?"
+    "How do vaccines protect against diseases?"
+    "What is the importance of sleep for mental health?"
+    "What are the latest discoveries in space exploration?"
+    "How does the internet work at a basic level?"
+    "What are the health benefits of meditation?"
+    "Why do stars twinkle?"
+    "What is the purpose of a balanced diet?"
+    "How do planets form in a solar system?"
+    "What is dark matter and why is it important?"
+    "How does artificial intelligence impact daily life?"
+    "Why do humans need exercise for good health?"
+    "How do satellites stay in orbit around Earth?"
+    "What is quantum computing and how does it work?"
+    "What are the effects of prolonged screen time on eyesight?"
+    "How does the human digestive system process food?"
+    "What are some emerging trends in software development?"
+    "How does climate change affect our planet?"
+    "What is blockchain technology and how does it work?"
+    "How does Bitcoin mining work?"
+    "What are the advantages and disadvantages of cryptocurrencies?"
+    "What is DeFi (Decentralized Finance) and why is it important?"
+    "How do smart contracts work on the Ethereum network?"
+    "What are stablecoins and how do they maintain value stability?"
+    "How does blockchain ensure security and decentralization?"
+    "What are NFTs (Non-Fungible Tokens) and how do they work?"
+    "What is the difference between proof-of-work and proof-of-stake?"
+    "How does cryptocurrency taxation work in different countries?"
+    "What are some key financial habits for wealth management?"
+    "How does compound interest work in investments?"
+    "What are the risks and rewards of investing in the stock market?"
+    "How do credit scores impact personal finance?"
+    "What are the key differences between mutual funds and ETFs?"
+    "How does inflation affect the economy and personal savings?"
 )
 
-# Function to get a random GK question
-generate_random_gk_question() {
-    echo "${gk_questions[$RANDOM % ${#gk_questions[@]}]}"
+# Function to get a random general question
+generate_random_general_question() {
+    echo "${general_questions[$RANDOM % ${#general_questions[@]}]}"
 }
 
 # Function to handle the API request
@@ -74,7 +93,7 @@ send_request() {
     local message="$1"
     local api_key="$2"
 
-    echo "📩 Sending Question: $message"
+    echo "📬 Sending Question: $message"
 
     json_data=$(cat <<EOF
 {
@@ -151,13 +170,7 @@ while true; do
         exit 0
     fi
 
-    # Randomly decide whether to ask a math or GK question (50% chance each)
-    if (( RANDOM % 2 == 0 )); then
-        random_message=$(generate_random_math_question)
-    else
-        random_message=$(generate_random_gk_question)
-    fi
-    
+    random_message=$(generate_random_general_question)
     send_request "$random_message" "$api_key"
     sleep 2
 done
