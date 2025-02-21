@@ -5,6 +5,7 @@ check_cuda() {
     if command -v nvcc &> /dev/null; then
         cuda_version=$(nvcc --version | grep "release" | awk '{print $6}' | tr -d ",")
         echo "❌ NVIDIA CUDA detected (Version: $cuda_version)! This script is for non-GPU users only."
+        sleep 60
         exit 1
     fi
 }
