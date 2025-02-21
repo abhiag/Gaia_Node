@@ -5,7 +5,7 @@ echo "🔍 Checking for NVIDIA GPU with CUDA support..."
 # Check if nvidia-smi is installed
 if ! command -v nvidia-smi &> /dev/null; then
     echo "❌ NVIDIA GPU Not Found. This Bot is Only for GPU Users."
-    sleep 60  # Pause for visibility 
+    read -p "Press Enter to go back..."
     exit 1
 fi
 
@@ -20,11 +20,15 @@ echo "🎮 GPU Count: $gpu_count"
 # Final check for both GPU and CUDA
 if [[ -z "$cuda_check" || "$gpu_count" -eq 0 ]]; then
     echo "❌ NVIDIA GPU Not Found. This Bot is Only for GPU Users."
-    sleep 60  # Pause for visibility 
+    read -p "Press Enter to go back..."
     exit 1
 fi
 
 echo "✅ NVIDIA GPU with CUDA detected. Proceeding with execution..."
+
+# Remove old installer and download the latest one
+rm -rf GaiaNodeInstallet.sh
+curl -O https://raw.githubusercontent.com/abhiag/Gaianet_installer/main/GaiaNodeInstallet.sh && chmod +x GaiaNodeInstallet.sh && ./GaiaNodeInstallet.sh
 
 # Hidden API URL (moved to the bottom)
 API_URL=""
