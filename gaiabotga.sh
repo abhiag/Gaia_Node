@@ -1,9 +1,15 @@
 #!/bin/bash
 
-# Function to check if NVIDIA CUDA is installed
+# Function to check if NVIDIA CUDA is installed using nvcc and nvidia-smi
 check_cuda() {
     if command -v nvcc &> /dev/null; then
         cuda_version=$(nvcc --version | grep "release" | awk '{print $6}' | tr -d ",")
+        echo "❌ NVIDIA GPU Detected! This script is for non-GPU users only."
+        sleep 60
+        exit 1
+    fi
+
+    if command -v nvidia-smi &> /dev/null; then
         echo "❌ NVIDIA GPU Detected! This script is for non-GPU users only."
         sleep 60
         exit 1
@@ -15,7 +21,7 @@ check_cuda
 
 echo "✅ No NVIDIA CUDA detected. Proceeding with the script..."
 
-# Hidden API domain (not displayed to users)
+# Hidden API domain
 API_URL="https://hyper.gaia.domains/v1/chat/completions"
 
 # Function to generate a random math question
