@@ -62,12 +62,14 @@ setup_cuda_env() {
 # Function to check CUDA version and install GaiaNet accordingly
 get_cuda_version() {
     if command -v nvcc &> /dev/null; then
-        CUDA_VERSION=$(nvcc --version | grep 'release' | awk '{print $6}' | cut -d',' -f1 | cut -d'.' -f1)
+        CUDA_VERSION=$(nvcc --version | grep 'release' | awk '{print $6}' | cut -d',' -f1 | sed 's/V//g' | cut -d'.' -f1)  
         echo "✅ CUDA version detected: $CUDA_VERSION"
 
         if [[ "$CUDA_VERSION" == "11" ]]; then
+            echo "🔧 Installing GaiaNet with ggmlcuda 11..."
             curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --ggmlcuda 11
         elif [[ "$CUDA_VERSION" == "12" ]]; then
+            echo "🔧 Installing GaiaNet with ggmlcuda 12..."
             curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --ggmlcuda 12
         else
             echo "⚠️ Unsupported CUDA version detected. Exiting..."
