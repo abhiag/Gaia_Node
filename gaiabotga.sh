@@ -108,7 +108,7 @@ start_thread() {
 
         ((response_count++))
         send_request "$random_message" "$api_key" "$response_count"
-        sleep 20
+        sleep 30
     done
 }
 
