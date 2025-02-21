@@ -6,7 +6,7 @@ check_cuda() {
         echo "✅ NVIDIA GPU with CUDA detected. Proceeding with execution..."
     else
         echo "❌ NVIDIA GPU Not Found. This Bot is Only for GPU Users."
-        echo "Press Enter to go back and Nvidia GPU Supported BOT..."  
+        echo "Press Enter to go back and Run on GPU Device..."  
         read -r  # Waits for user input
 
         # Remove old script, download and execute new one
