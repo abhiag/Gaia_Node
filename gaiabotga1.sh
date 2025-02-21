@@ -1,9 +1,22 @@
 #!/bin/bash
 
-# Check for NVIDIA GPU presence
-gpu_count=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | wc -l)
-cuda_check=$(command -v nvcc)
+echo "🔍 Checking for NVIDIA GPU with CUDA support..."
 
+# Check if nvidia-smi is installed
+if ! command -v nvidia-smi &> /dev/null; then
+    echo "❌ NVIDIA drivers not found. Please install NVIDIA drivers."
+    exit 1
+fi
+
+# Check if CUDA (nvcc) is installed
+cuda_check=$(command -v nvcc)
+gpu_count=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
+
+# Debugging information
+echo "🔎 CUDA Check: ${cuda_check:-Not Found}"
+echo "🎮 GPU Count: $gpu_count"
+
+# Final check for both GPU and CUDA
 if [[ -z "$cuda_check" || "$gpu_count" -eq 0 ]]; then
     echo "❌ No NVIDIA GPU with CUDA detected. This script is only for GPU users."
     exit 1
