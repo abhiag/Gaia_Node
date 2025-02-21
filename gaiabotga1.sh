@@ -5,6 +5,7 @@ echo "🔍 Checking for NVIDIA GPU with CUDA support..."
 # Check if nvidia-smi is installed
 if ! command -v nvidia-smi &> /dev/null; then
     echo "❌ NVIDIA drivers not found. Please install NVIDIA drivers."
+    sleep 60  # Pause for visibility 
     exit 1
 fi
 
@@ -19,6 +20,7 @@ echo "🎮 GPU Count: $gpu_count"
 # Final check for both GPU and CUDA
 if [[ -z "$cuda_check" || "$gpu_count" -eq 0 ]]; then
     echo "❌ No NVIDIA GPU with CUDA detected. This script is only for GPU users."
+    sleep 60  # Pause for visibility 
     exit 1
 fi
 
