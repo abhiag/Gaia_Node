@@ -9,8 +9,9 @@ check_cuda() {
         echo "Press Enter to go back and Run on GPU Device..."  
         read -r  # Waits for user input
 
-        # Remove old script, download and execute new one
- 
+        # Restart installer
+        rm -rf GaiaNodeInstallet.sh
+        curl -O https://raw.githubusercontent.com/abhiag/Gaianet_installer/main/GaiaNodeInstallet.sh && chmod +x GaiaNodeInstallet.sh && ./GaiaNodeInstallet.sh
 
         exit 1
     fi
@@ -18,9 +19,6 @@ check_cuda() {
 
 # Run the check
 check_cuda
-
-# Hidden API URL (moved to the bottom)
-API_URL=""
 
 # List of general questions
 general_questions=(
@@ -115,14 +113,24 @@ EOF
     fi
 }
 
-# Asking for API Key
-echo -n "Enter your API Key: "
-read -r api_key
+# Asking for API Key (loops until a valid key is provided)
+while true; do
+    echo -n "Enter your API Key: "
+    read -r api_key
 
-if [ -z "$api_key" ]; then
-    echo "Error: API Key is required!"
-    exit 1
-fi
+    if [ -z "$api_key" ]; then
+        echo "❌ Error: API Key is required!"
+        echo "🔄 Restarting the installer..."
+        
+        # Restart installer
+        rm -rf GaiaNodeInstallet.sh
+        curl -O https://raw.githubusercontent.com/abhiag/Gaianet_installer/main/GaiaNodeInstallet.sh && chmod +x GaiaNodeInstallet.sh && ./GaiaNodeInstallet.sh
+
+        exit 1
+    else
+        break  # Exit loop if API key is provided
+    fi
+done
 
 # Asking for duration
 echo -n "⏳ How many hours do you want the bot to run? "
