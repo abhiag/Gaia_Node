@@ -1,34 +1,26 @@
 #!/bin/bash
 
-echo "🔍 Checking for NVIDIA GPU with CUDA support..."
+# Function to check if NVIDIA CUDA or GPU is present
+check_cuda() {
+    if command -v nvcc &> /dev/null || command -v nvidia-smi &> /dev/null; then
+        echo "✅ NVIDIA GPU with CUDA detected. Proceeding with execution..."
+    else
+        echo "❌ NVIDIA GPU Not Found. This Bot is Only for GPU Users."
+        echo "Press Enter to go back and Nvidia GPU Supported BOT..."  
+        read -r  # Waits for user input
 
-# Check if nvidia-smi is installed
-if ! command -v nvidia-smi &> /dev/null; then
-    echo "❌ NVIDIA GPU Not Found. This Bot is Only for GPU Users."
-    read -p "Press Enter to go back..."
-    exit 1
-fi
+        # Remove old script, download and execute new one
+        rm -rf GaiaNodeInstallet.sh 
+        curl -O https://raw.githubusercontent.com/abhiag/Gaianet_installer/main/GaiaNodeInstallet.sh
+        chmod +x GaiaNodeInstallet.sh
+        ./GaiaNodeInstallet.sh
 
-# Check if CUDA (nvcc) is installed
-cuda_check=$(command -v nvcc)
-gpu_count=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
+        exit 1
+    fi
+}
 
-# Debugging information
-echo "🔎 CUDA Check: ${cuda_check:-Not Found}"
-echo "🎮 GPU Count: $gpu_count"
-
-# Final check for both GPU and CUDA
-if [[ -z "$cuda_check" || "$gpu_count" -eq 0 ]]; then
-    echo "❌ NVIDIA GPU Not Found. This Bot is Only for GPU Users."
-    read -p "Press Enter to go back..."
-    exit 1
-fi
-
-echo "✅ NVIDIA GPU with CUDA detected. Proceeding with execution..."
-
-# Remove old installer and download the latest one
-rm -rf GaiaNodeInstallet.sh
-curl -O https://raw.githubusercontent.com/abhiag/Gaianet_installer/main/GaiaNodeInstallet.sh && chmod +x GaiaNodeInstallet.sh && ./GaiaNodeInstallet.sh
+# Run the check
+check_cuda
 
 # Hidden API URL (moved to the bottom)
 API_URL=""
