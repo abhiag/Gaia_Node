@@ -1,281 +1,107 @@
 #!/bin/bash
 
-printf "\n"
-cat <<EOF
-
-
-░██████╗░░█████╗░  ░█████╗░██████╗░██╗░░░██╗██████╗░████████╗░█████╗░
-██╔════╝░██╔══██╗  ██╔══██╗██╔══██╗╚██╗░██╔╝██╔══██╗╚══██╔══╝██╔══██╗
-██║░░██╗░███████║  ██║░░╚═╝██████╔╝░╚████╔╝░██████╔╝░░░██║░░░██║░░██║
-██║░░╚██╗██╔══██║  ██║░░██╗██╔══██╗░░╚██╔╝░░██╔═══╝░░░░██║░░░██║░░██║
-╚██████╔╝██║░░██║  ╚█████╔╝██║░░██║░░░██║░░░██║░░░░░░░░██║░░░╚█████╔╝
-░╚═════╝░╚═╝░░╚═╝  ░╚════╝░╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░░░░╚═╝░░░░╚════╝░
-EOF
-
-printf "\n\n"
-
-##########################################################################################
-#                                                                                        
-#                🚀 THIS SCRIPT IS PROUDLY CREATED BY **GA CRYPTO**! 🚀                 
-#                                                                                        
-#   🌐 Join our revolution in decentralized networks and crypto innovation!               
-#                                                                                        
-# 📢 Stay updated:                                                                      
-#     • Follow us on Telegram: https://t.me/GaCryptOfficial                             
-#     • Follow us on X: https://x.com/GACryptoO                                         
-##########################################################################################
-
-# Green color for advertisement
-GREEN="\033[0;32m"
-RESET="\033[0m"
-
-#!/bin/bash
-
-# Ensure pciutils is installed
-echo "📦 Installing pciutils (required for GPU detection)..."
-sudo apt update -y && sudo apt install -y pciutils
+# Ensure required packages are installed
+echo "📦 Installing dependencies..."
+sudo apt update -y && sudo apt install -y pciutils libgomp1 curl wget
+sudo apt update && sudo apt install -y build-essential libglvnd-dev pkg-config
 
 # Function to check if an NVIDIA GPU is present
 check_nvidia_gpu() {
-    if lspci | grep -i nvidia &> /dev/null; then
+    if command -v nvidia-smi &> /dev/null; then
         echo "✅ NVIDIA GPU detected."
         return 0
+    elif lspci | grep -i nvidia &> /dev/null; then
+        echo "✅ NVIDIA GPU detected (via lspci)."
+        return 0
     else
-        echo "⚠️ No NVIDIA GPU found. Installing GaiaNet **without CUDA**."
-        install_gaianet_without_cuda
-        exit 0
+        echo "⚠️ No NVIDIA GPU found."
+        return 1
     fi
 }
 
-# Function to check if CUDA is installed and return its version
+# Function to check CUDA version
 get_cuda_version() {
     if command -v nvcc &> /dev/null; then
-        CUDA_VERSION=$(nvcc --version | grep "release" | awk '{print $6}' | cut -d',' -f1)
-        echo "✅ Detected CUDA version: $CUDA_VERSION"
-        return 0
-    else
-        echo "❌ CUDA is not installed."
-        return 1
-    fi
-}
-
-# Function to install CUDA
-install_cuda() {
-    echo "📥 Installing CUDA..."
-    sudo apt update -y
-    sudo apt install -y nvidia-cuda-toolkit
-    if command -v nvcc &> /dev/null; then
-        CUDA_VERSION=$(nvcc --version | grep "release" | awk '{print $6}' | cut -d',' -f1)
-        echo "✅ CUDA installation successful! Installed version: $CUDA_VERSION"
-    else
-        echo "❌ Error: CUDA installation failed!"
-        exit 1
-    fi
-}
-
-# Function to install GaiaNet without CUDA
-install_gaianet_without_cuda() {
-    echo "📥 Installing GaiaNet node **without CUDA**..."
-    curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
-    status=$?
-
-    if [ $status -eq 0 ]; then
-        echo "✅ GaiaNet node installation successful (without CUDA)!"
-    else
-        echo "❌ Error: GaiaNet node installation failed!"
-        exit 1
-    fi
-
-    echo "Status: $status"
-}
-
-# Check for NVIDIA GPU before proceeding
-check_nvidia_gpu
-
-# If NVIDIA GPU is present, check if CUDA is installed
-if ! get_cuda_version; then
-    install_cuda
-    get_cuda_version  # Recheck after installation
-fi
-
-# Determine which --ggmlcuda version to use
-GGML_CUDA_VERSION=""
-if [[ "$CUDA_VERSION" == 11* ]]; then
-    GGML_CUDA_VERSION="11"
-elif [[ "$CUDA_VERSION" == 12* ]]; then
-    GGML_CUDA_VERSION="12"
-else
-    echo "⚠️ Unsupported CUDA version detected: $CUDA_VERSION. Defaulting to CUDA 12."
-    GGML_CUDA_VERSION="12"
-fi
-
-echo "🔧 Using --ggmlcuda $GGML_CUDA_VERSION for GaiaNet installation."
-
-# Set up CUDA environment variables
-echo "🔧 Configuring CUDA environment variables..."
-
-CUDA_PATH="/usr/local/cuda"
-BASHRC="$HOME/.bashrc"
-BASH_PROFILE="$HOME/.bash_profile"
-ZSHRC="$HOME/.zshrc"
-PROFILE="$HOME/.profile"
-
-EXPORT_LD_LIBRARY_PATH="export LD_LIBRARY_PATH=${CUDA_PATH}/lib64:\$LD_LIBRARY_PATH"
-EXPORT_PATH="export PATH=${CUDA_PATH}/bin:\$PATH"
-
-# Function to add environment variables if not already set
-add_to_shell_config() {
-    local file="$1"
-    if [ -f "$file" ]; then
-        if ! grep -qxF "$EXPORT_LD_LIBRARY_PATH" "$file"; then
-            echo "$EXPORT_LD_LIBRARY_PATH" >> "$file"
-        fi
-        if ! grep -qxF "$EXPORT_PATH" "$file"; then
-            echo "$EXPORT_PATH" >> "$file"
-        fi
-    fi
-}
-
-# Add environment variables to common shell configuration files
-add_to_shell_config "$BASHRC"
-add_to_shell_config "$BASH_PROFILE"
-add_to_shell_config "$ZSHRC"
-add_to_shell_config "$PROFILE"
-
-# Apply changes immediately without restart
-export LD_LIBRARY_PATH=${CUDA_PATH}/lib64:$LD_LIBRARY_PATH
-export PATH=${CUDA_PATH}/bin:$PATH
-source ~/.bashrc
-
-echo "✅ CUDA environment variables configured successfully and applied immediately!"
-
-# Install required system packages
-echo "📦 Installing Common Required Packages..."
-sudo apt update -y && sudo apt-get install libgomp1 -y
-
-# Install GaiaNet node with the correct CUDA version
-echo "📥 Installing GaiaNet node with CUDA $GGML_CUDA_VERSION support..."
-curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --ggmlcuda "$GGML_CUDA_VERSION"
-status=$?
-
-if [ $status -eq 0 ]; then
-    echo "✅ GaiaNet node installation successful!"
-else
-    echo "❌ Error: GaiaNet node installation failed!"
-    exit 1
-fi
-
-echo "Status: $status"
-
-# Function to check if GaiaNet is in PATH
-check_gaianet_path() {
-    if echo "$PATH" | grep -q "/opt/gaianet"; then
-        echo "✅ GaiaNet is already in system PATH."
-        return 0
-    else
-        return 1
-    fi
-}
-
-# Function to add GaiaNet to PATH and retry up to 5 times if needed
-add_gaianet_to_path() {
-    local attempt=1
-    while [ $attempt -le 5 ]; do
-        echo "🔗 Attempt #$attempt: Adding GaiaNet to system PATH..."
-        echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc && source ~/.bashrc
-
-        # Check if it was successfully added
-        if check_gaianet_path; then
-            echo "✅ GaiaNet added to PATH successfully!"
-            return 0
-        fi
-
-        attempt=$((attempt + 1))
-        sleep 2  # Wait before retrying
-    done
-
-    echo "❌ Error: Failed to add GaiaNet to PATH after 5 attempts!"
-    exit 1
-}
-
-# Check if GaiaNet is already in PATH; if not, attempt to add it
-if ! check_gaianet_path; then
-    add_gaianet_to_path
-else
-    echo "✅ No changes needed; GaiaNet is already in PATH."
-fi
-
-# Initialize GaiaNet node with the specified configuration
-echo "⚙️ Initializing GaiaNet node with the latest configuration..."
-gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config1.json
-status=$?
-
-if [ $status -eq 0 ]; then
-    echo "✅ GaiaNet node initialized successfully!"
-else
-    echo "❌ Error: Failed to initialize GaiaNet node!"
-    echo "🔍 Checking if GaiaNet is in the PATH..."
-
-    # Check if GaiaNet binary exists in /opt/gaianet/
-    if [ -f "/opt/gaianet/gaianet" ]; then
-        echo "✅ GaiaNet binary found in /opt/gaianet/. Adding it to PATH..."
-        echo 'export PATH=$PATH:/opt/gaianet/' >> ~/.bashrc
-        source ~/.bashrc
-
-        echo "🔄 Retrying initialization..."
-        gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config1.json
-        retry_status=$?
-
-        if [ $retry_status -eq 0 ]; then
-            echo "✅ GaiaNet node initialized successfully on retry!"
+        CUDA_VERSION=$(nvcc --version | grep 'release' | awk '{print $6}' | cut -d',' -f1)
+        echo "✅ CUDA version detected: $CUDA_VERSION"
+        if [[ "$CUDA_VERSION" == 11* ]]; then
+            GGMLCUDA_VERSION=11
         else
-            echo "❌ Error: Initialization failed even after fixing PATH!"
-            exit 1
+            GGMLCUDA_VERSION=12
         fi
+        return 0
     else
-        echo "❌ GaiaNet binary not found in /opt/gaianet/!"
-        echo "🚨 Please ensure GaiaNet is installed and accessible."
-        exit 1
+        echo "⚠️ CUDA not found. Installing CUDA Toolkit 12.8..."
+        install_cuda
     fi
+}
+
+# Function to install CUDA Toolkit
+install_cuda() {
+    if grep -qi microsoft /proc/version; then
+        echo "🖥️ Running inside WSL. Installing CUDA Toolkit for WSL..."
+        wget https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-wsl-ubuntu.pin
+        sudo mv cuda-wsl-ubuntu.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda-repo-wsl-ubuntu-12-8-local_12.8.0-1_amd64.deb
+        sudo dpkg -i cuda-repo-wsl-ubuntu-12-8-local_12.8.0-1_amd64.deb
+        sudo cp /var/cuda-repo-wsl-ubuntu-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/
+        sudo apt-get update
+        sudo apt-get -y install cuda-toolkit-12-8
+    elif grep -q 'Ubuntu 22' /etc/os-release; then
+        echo "🖥️ Installing CUDA Toolkit for Ubuntu 22.04..."
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin
+        sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda-repo-ubuntu2204-12-8-local_12.8.0-570.86.10-1_amd64.deb
+        sudo dpkg -i cuda-repo-ubuntu2204-12-8-local_12.8.0-570.86.10-1_amd64.deb
+        sudo cp /var/cuda-repo-ubuntu2204-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/
+        sudo apt-get update
+        sudo apt-get -y install cuda-toolkit-12-8
+    elif grep -q 'Ubuntu 24' /etc/os-release; then
+        echo "🖥️ Installing CUDA Toolkit for Ubuntu 24.04..."
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-ubuntu2404.pin
+        sudo mv cuda-ubuntu2404.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda-repo-ubuntu2404-12-8-local_12.8.0-570.86.10-1_amd64.deb
+        sudo dpkg -i cuda-repo-ubuntu2404-12-8-local_12.8.0-570.86.10-1_amd64.deb
+        sudo cp /var/cuda-repo-ubuntu2404-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/
+        sudo apt-get update
+        sudo apt-get -y install cuda-toolkit-12-8
+    fi
+    setup_cuda_env
+}
+
+# Function to set up environment variables
+setup_cuda_env() {
+    echo "🔧 Setting up CUDA environment variables..."
+    echo 'export PATH=/usr/local/cuda-12.8/bin${PATH:+:${PATH}}' >> ~/.bashrc
+    echo 'export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}' >> ~/.bashrc
+    source ~/.bashrc
+}
+
+# Run checks and installations
+if check_nvidia_gpu; then
+    get_cuda_version
+    setup_cuda_env
+    install_gaianet
+    add_gaianet_to_path
+    echo "⚙️ Initializing GaiaNet node with CUDA..."
+    gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config1.json || { echo "❌ GaiaNet initialization failed!"; exit 1; }
+else
+    install_gaianet
+    add_gaianet_to_path
+    echo "⚙️ Initializing GaiaNet node without CUDA..."
+    gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config2.json || { echo "❌ GaiaNet initialization failed!"; exit 1; }
 fi
 
-echo "Status: $status"
-
-
-# Start the GaiaNet node
+# Start GaiaNet node
 echo "🚀 Starting GaiaNet node..."
 gaianet config --domain gaia.domains
-gaianet start
-status=$?
-if [ $status -eq 0 ]; then
-    echo "✅ GaiaNet node started successfully!"
-else
-    echo "❌ Error: Failed to start GaiaNet node!"
-    exit 1
-fi
-echo "Status: $status"
+gaianet start || { echo "❌ Error: Failed to start GaiaNet node!"; exit 1; }
 
-# Display GaiaNet node info
 echo "🔍 Fetching GaiaNet node information..."
-gaianet info
-status=$?
-if [ $status -eq 0 ]; then
-    echo "✅ GaiaNet node information fetched successfully!"
-else
-    echo "❌ Error: Failed to fetch GaiaNet node information!"
-    exit 1
-fi
-echo "Status: $status"
+gaianet info || { echo "❌ Error: Failed to fetch GaiaNet node information!"; exit 1; }
 
-# Closing message
-echo ""
 echo "==========================================================="
 echo "🎉 Congratulations! Your GaiaNet node is successfully set up!"
-echo ""
-echo "🌟 This script was brought to you by GA Crypto!"
-echo "   • Stay connected for the latest updates:"
-echo "     Telegram: https://t.me/GaCryptOfficial"
-echo "     X (formerly Twitter): https://x.com/GACryptoO"
-echo ""
+echo "🌟 Stay connected: Telegram: https://t.me/GaCryptOfficial | Twitter: https://x.com/GACryptoO"
 echo "💪 Together, let's build the future of decentralized networks!"
 echo "==========================================================="
