@@ -1,5 +1,36 @@
 #!/bin/bash
 
+printf "\n"
+cat <<EOF
+
+
+░██████╗░░█████╗░  ░█████╗░██████╗░██╗░░░██╗██████╗░████████╗░█████╗░
+██╔════╝░██╔══██╗  ██╔══██╗██╔══██╗╚██╗░██╔╝██╔══██╗╚══██╔══╝██╔══██╗
+██║░░██╗░███████║  ██║░░╚═╝██████╔╝░╚████╔╝░██████╔╝░░░██║░░░██║░░██║
+██║░░╚██╗██╔══██║  ██║░░██╗██╔══██╗░░╚██╔╝░░██╔═══╝░░░░██║░░░██║░░██║
+╚██████╔╝██║░░██║  ╚█████╔╝██║░░██║░░░██║░░░██║░░░░░░░░██║░░░╚█████╔╝
+░╚═════╝░╚═╝░░╚═╝  ░╚════╝░╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░░░░╚═╝░░░░╚════╝░
+EOF
+
+printf "\n\n"
+
+##########################################################################################
+#                                                                                        
+#                🚀 THIS SCRIPT IS PROUDLY CREATED BY **GA CRYPTO**! 🚀                 
+#                                                                                        
+#   🌐 Join our revolution in decentralized networks and crypto innovation!               
+#                                                                                        
+# 📢 Stay updated:                                                                      
+#     • Follow us on Telegram: https://t.me/GaCryptOfficial                             
+#     • Follow us on X: https://x.com/GACryptoO                                         
+##########################################################################################
+
+# Green color for advertisement
+GREEN="\033[0;32m"
+RESET="\033[0m"
+
+#!/bin/bash
+
 # Ensure required packages are installed
 echo "📦 Installing dependencies..."
 sudo apt update -y && sudo apt install -y pciutils libgomp1 curl wget
@@ -100,7 +131,7 @@ if check_nvidia_gpu; then
     install_gaianet
     add_gaianet_to_path
     echo "⚙️ Initializing GaiaNet node with CUDA..."
-    ~/gaianet/bin/gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/config1.json || { echo "❌ GaiaNet initialization failed!"; exit 1; }
+    ~/gaianet/bin/gaianet init --config https://raw.githubusercontent.com/abhiag/Gaia_Node/main/qwen1.5.json || { echo "❌ GaiaNet initialization failed!"; exit 1; }
 else
     install_gaianet
     add_gaianet_to_path
@@ -122,3 +153,8 @@ echo "🎉 Congratulations! Your GaiaNet node is successfully set up!"
 echo "🌟 Stay connected: Telegram: https://t.me/GaCryptOfficial | Twitter: https://x.com/GACryptoO"
 echo "💪 Together, let's build the future of decentralized networks!"
 echo "===========================================================" 
+echo "==========================================================="
+echo "🎉 Congratulations! Your GaiaNet node is successfully set up!"
+echo "🌟 Stay connected: Telegram: https://t.me/GaCryptOfficial | Twitter: https://x.com/GACryptoO"
+echo "💪 Together, let's build the future of decentralized networks!"
+echo "==========================================================="
