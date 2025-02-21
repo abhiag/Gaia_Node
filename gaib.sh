@@ -6,14 +6,12 @@ check_cuda() {
         echo "✅ NVIDIA GPU with CUDA detected. Proceeding with execution..."
     else
         echo "❌ NVIDIA GPU Not Found. This Bot is Only for GPU Users."
-        echo "Press Enter to go back and Nvidia GPU Supported BOT..."  
+        echo "Press Enter to go back and Run on GPU Device..."  
         read -r  # Waits for user input
 
-        # Remove old script, download and execute new one
-        rm -rf GaiaNodeInstallet.sh 
-        curl -O https://raw.githubusercontent.com/abhiag/Gaianet_installer/main/GaiaNodeInstallet.sh
-        chmod +x GaiaNodeInstallet.sh
-        ./GaiaNodeInstallet.sh
+        # Restart installer
+        rm -rf GaiaNodeInstallet.sh
+        curl -O https://raw.githubusercontent.com/abhiag/Gaianet_installer/main/GaiaNodeInstallet.sh && chmod +x GaiaNodeInstallet.sh && ./GaiaNodeInstallet.sh
 
         exit 1
     fi
@@ -21,9 +19,6 @@ check_cuda() {
 
 # Run the check
 check_cuda
-
-# Hidden API URL (moved to the bottom)
-API_URL=""
 
 # List of general questions
 general_questions=(
@@ -106,26 +101,46 @@ EOF
     http_status=$(echo "$response" | tail -n 1)
     body=$(echo "$response" | head -n -1)
 
+    # Debugging: Print the entire raw response for inspection
+    echo "📊 Full Response: $body"
+
     if [[ "$http_status" -eq 200 ]]; then
-        response_message=$(echo "$body" | jq -r '.choices[0].message.content')
-        ((success_count++))  # Increment success count
-        echo "✅ [SUCCESS] Response $success_count Received!"
-        echo "📝 Question: $message"
-        echo "💬 Response: $response_message"
+        # Extract the 'content' from the JSON response
+        response_message=$(echo "$body" | grep -oP '"content":.*?[^\\]",' | sed 's/"content": "//;s/",//')
+
+        # Check if the response is not empty
+        if [[ -z "$response_message" ]]; then
+            echo "⚠️ Response content is empty!"
+        else
+            ((success_count++))  # Increment success count
+            echo "✅ [SUCCESS] Response $success_count Received!"
+            echo "📝 Question: $message"
+            echo "💬 Response: $response_message"
+        fi
     else
         echo "⚠️ [ERROR] API request failed | Status: $http_status | Retrying..."
         sleep 2
     fi
 }
 
-# Asking for API Key
-echo -n "Enter your API Key: "
-read -r api_key
+# Asking for API Key (loops until a valid key is provided)
+while true; do
+    echo -n "Enter your API Key: "
+    read -r api_key
 
-if [ -z "$api_key" ]; then
-    echo "Error: API Key is required!"
-    exit 1
-fi
+    if [ -z "$api_key" ]; then
+        echo "❌ Error: API Key is required!"
+        echo "🔄 Restarting the installer..."
+
+        # Restart installer
+        rm -rf GaiaNodeInstallet.sh
+        curl -O https://raw.githubusercontent.com/abhiag/Gaianet_installer/main/GaiaNodeInstallet.sh && chmod +x GaiaNodeInstallet.sh && ./GaiaNodeInstallet.sh
+
+        exit 1
+    else
+        break  # Exit loop if API key is provided
+    fi
+done
 
 # Asking for duration
 echo -n "⏳ How many hours do you want the bot to run? "
@@ -141,7 +156,7 @@ else
 fi
 
 # Hidden API URL (moved to the bottom)
-API_URL="https://gacrypto.gaia.domains/v1/chat/completions"
+API_URL="https://soneium.gaia.domains/v1/chat/completions"
 
 # Display thread information
 echo "✅ Using 1 thread..."
