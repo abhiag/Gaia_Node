@@ -21,7 +21,7 @@ check_cuda() {
 check_cuda
 
 # List of general questions
-general_questions=(
+general_questions=( 
     "What are the benefits of drinking enough water every day?"
     "How does the human brain store memories?"
     "What is the Milky Way galaxy and how big is it?"
@@ -105,8 +105,8 @@ EOF
     echo "📊 Full Response: $body"
 
     if [[ "$http_status" -eq 200 ]]; then
-        # Extract the 'content' from the JSON response
-        response_message=$(echo "$body" | grep -oP '"content":.*?[^\\]",' | sed 's/"content": "//;s/",//')
+        # Extract the 'content' from the JSON response using jq
+        response_message=$(echo "$body" | jq -r '.choices[0].message.content')
 
         # Check if the response is not empty
         if [[ -z "$response_message" ]]; then
