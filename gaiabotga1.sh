@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Check for NVIDIA GPU presence
+gpu_count=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | wc -l)
+cuda_check=$(command -v nvcc)
+
+if [[ -z "$cuda_check" || "$gpu_count" -eq 0 ]]; then
+    echo "❌ No NVIDIA GPU with CUDA detected. This script is only for GPU users."
+    exit 1
+fi
+
+echo "✅ NVIDIA GPU with CUDA detected. Proceeding with execution..."
+
 # Hidden API URL (moved to the bottom)
 API_URL=""
 
@@ -32,6 +43,25 @@ gk_questions=(
     "Which is the tallest mountain in the world?"
     "What is the hardest natural substance on Earth?"
     "What is the boiling point of water in Celsius?"
+    "Which continent is known as the 'Dark Continent'?"
+    "What is the smallest country in the world?"
+    "Who invented the telephone?"
+    "Which ocean is the largest?"
+    "What is the name of the first man to walk on the moon?"
+    "What is the national bird of the United States?"
+    "Who discovered penicillin?"
+    "Which gas do plants absorb from the atmosphere?"
+    "What is the capital of Japan?"
+    "How many bones are there in the human body?"
+    "Which country gifted the Statue of Liberty to the USA?"
+    "Which is the largest desert in the world?"
+    "Who wrote 'The Theory of Relativity'?"
+    "Which element has the chemical symbol 'O'?"
+    "What is the square root of 144?"
+    "Who was the first woman to win a Nobel Prize?"
+    "Which planet is known as the Red Planet?"
+    "Who composed 'Fur Elise'?"
+    "How many continents are there on Earth?"
 )
 
 # Function to get a random GK question
@@ -79,7 +109,7 @@ EOF
 
 # Asking for API Key
 echo -n "Enter your API Key: "
-read api_key
+read -r api_key
 
 if [ -z "$api_key" ]; then
     echo "Error: API Key is required!"
@@ -88,7 +118,7 @@ fi
 
 # Asking for duration
 echo -n "⏳ How many hours do you want the bot to run? "
-read bot_hours
+read -r bot_hours
 
 # Convert hours to seconds
 if [[ "$bot_hours" =~ ^[0-9]+$ ]]; then
