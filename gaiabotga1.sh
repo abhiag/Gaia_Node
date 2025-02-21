@@ -105,11 +105,18 @@ EOF
     echo "📊 Full Response: $body"
 
     if [[ "$http_status" -eq 200 ]]; then
-        response_message=$(echo "$body")  # Raw response instead of using jq
-        ((success_count++))  # Increment success count
-        echo "✅ [SUCCESS] Response $success_count Received!"
-        echo "📝 Question: $message"
-        echo "💬 Response: $response_message"
+        # Extract the 'content' from the JSON response
+        response_message=$(echo "$body" | grep -oP '"content":.*?[^\\]",' | sed 's/"content": "//;s/",//')
+
+        # Check if the response is not empty
+        if [[ -z "$response_message" ]]; then
+            echo "⚠️ Response content is empty!"
+        else
+            ((success_count++))  # Increment success count
+            echo "✅ [SUCCESS] Response $success_count Received!"
+            echo "📝 Question: $message"
+            echo "💬 Response: $response_message"
+        fi
     else
         echo "⚠️ [ERROR] API request failed | Status: $http_status | Retrying..."
         sleep 2
