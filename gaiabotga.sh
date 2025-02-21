@@ -1,17 +1,20 @@
 #!/bin/bash
 
-# Function to check if NVIDIA CUDA is installed using nvcc and nvidia-smi
-check_cuda() {
-    if command -v nvcc &> /dev/null; then
-        cuda_version=$(nvcc --version | grep "release" | awk '{print $6}' | tr -d ",")
-        echo "❌ NVIDIA GPU Detected! This script is for non-GPU users only."
-        sleep 60
-        exit 1
-    fi
+#!/bin/bash
 
-    if command -v nvidia-smi &> /dev/null; then
+# Function to check if NVIDIA CUDA or GPU is present
+check_cuda() {
+    if command -v nvcc &> /dev/null || command -v nvidia-smi &> /dev/null; then
         echo "❌ NVIDIA GPU Detected! This script is for non-GPU users only."
-        sleep 60
+        echo "Press Enter to go back and Run Non-GPU or VPS Supported BOT..." 
+        read -r  # Waits for user input
+
+        # Remove old script, download and execute new one
+        rm -rf GaiaNodeInstallet.sh 
+        curl -O https://raw.githubusercontent.com/abhiag/Gaianet_installer/main/GaiaNodeInstallet.sh
+        chmod +x GaiaNodeInstallet.sh
+        ./GaiaNodeInstallet.sh
+
         exit 1
     fi
 }
