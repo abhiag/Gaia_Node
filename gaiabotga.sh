@@ -1,15 +1,47 @@
 #!/bin/bash
 
-# Predefined domain URL (Hidden from users)
+# Function to check if NVIDIA CUDA is installed
+if command -v nvcc &> /dev/null && command -v nvidia-smi &> /dev/null; then
+    echo "❌ NVIDIA CUDA detected! This script is for non-GPU users only."
+    exit 1
+fi
+
+echo "✅ No NVIDIA CUDA detected. Proceeding with the script..."
+
+# Hidden API domain (not displayed to users)
 API_URL="https://hyper.gaia.domains/v1/chat/completions"
 
-# Function to handle the API request
+# Function to generate a random math question
+generate_random_math_question() {
+    local num1=$((RANDOM % 100))
+    local num2=$((RANDOM % 100))
+    local operators=("+ - * ÷")
+    local operator=($operators)
+    echo "What is $num1 ${operator[RANDOM % ${#operator[@]}]} $num2?"
+}
+
+# Function to generate a random general knowledge question
+generate_random_gk_question() {
+    local gk_questions=(
+        "Who is the current President of the United States?"
+        "What is the capital of Japan?"
+        "Which planet is known as the Red Planet?"
+        "Who wrote 'To Kill a Mockingbird'?"
+        "What is the largest ocean on Earth?"
+        "Which country has the most population?"
+        "What is the fastest land animal?"
+        "Who discovered gravity?"
+    )
+    echo "${gk_questions[RANDOM % ${#gk_questions[@]}]}"
+}
+
+# Function to send an API request
 send_request() {
     local message="$1"
     local api_key="$2"
+    local count="$3"
 
     while true; do
-        # Prepare the JSON payload
         json_data=$(cat <<EOF
 {
     "messages": [
@@ -20,31 +52,24 @@ send_request() {
 EOF
         )
 
-        # Send the request using curl and capture both the response and status code
         response=$(curl -s -w "\n%{http_code}" -X POST "$API_URL" \
             -H "Authorization: Bearer $api_key" \
             -H "Accept: application/json" \
             -H "Content-Type: application/json" \
             -d "$json_data")
 
-        # Extract the HTTP status code from the response
         http_status=$(echo "$response" | tail -n 1)
         body=$(echo "$response" | head -n -1)
 
         if [[ "$http_status" -eq 200 ]]; then
-            # Check if the response is valid JSON
             echo "$body" | jq . > /dev/null 2>&1
             if [ $? -eq 0 ]; then
-                # Print the question and response content
-                echo "✅ [SUCCESS] Message Sent Successfully to Non-GPU Domain: '$message'"
-
-                # Extract the response message from the JSON
                 response_message=$(echo "$body" | jq -r '.choices[0].message.content')
                 
-                # Print both the question and the response
+                echo "✅ [SUCCESS] Response $count Received!"
                 echo "Question: $message"
                 echo "Response: $response_message"
-                break  # Exit loop if request was successful
+                break  
             else
                 echo "⚠️ [ERROR] Invalid JSON response!"
                 echo "Response Text: $body"
@@ -56,71 +81,39 @@ EOF
     done
 }
 
-# Define a list of predefined messages
-user_messages=(
-    "What is 8 + 5?"
-    "What is 12 - 7?"
-    "What is 6 × 4?"
-    "What is 20 ÷ 5?"
-    "What is 15 + 9?"
-    "What is 50 - 25?"
-    "What is 9 × 3?"
-    "What is 36 ÷ 6?"
-    "What is 7 + 8?"
-    "What is 14 - 6?"
-    "What is 5 × 7?"
-    "What is 81 ÷ 9?"
-    "What is 25 + 17?"
-    "What is 60 - 32?"
-    "What is 11 × 6?"
-    "What is 100 ÷ 20?"
-    "What is 19 + 4?"
-    "What is 45 - 18?"
-    "What is 8 × 9?"
-    "What is 72 ÷ 8?"
-    "What is 13 + 29?"
-    "What is 90 - 44?"
-    "What is 4 × 12?"
-    "What is 144 ÷ 12?"
-    "What is 33 + 27?"
-    "What is 81 - 39?"
-    "What is 7 × 11?"
-    "What is 225 ÷ 15?"
-    "What is 56 + 14?"
-    "What is 98 - 56?"
-)
-
-# Ask the user to input API Key
+# Ask for API Key
 echo -n "Enter your API Key: "
 read api_key
 
-# Exit if the API Key is empty
 if [ -z "$api_key" ]; then
     echo "Error: API Key is required!"
     exit 1
 fi
 
-# 1-minute delay before sending the first request
-echo "⏳ Waiting 1 minute before sending the first request..."
-sleep 60
+echo "⏳ Waiting 30 seconds before sending the first request..."
+sleep 30
 
-# Function to run the single thread
+# Response counter
+response_count=0
+
+# Function to start the process
 start_thread() {
     while true; do
-        # Pick a random message from the predefined list
-        random_message="${user_messages[$RANDOM % ${#user_messages[@]}]}"
-        send_request "$random_message" "$api_key"
+        # Randomly decide between math and GK questions
+        if (( RANDOM % 2 == 0 )); then
+            random_message=$(generate_random_math_question)
+        else
+            random_message=$(generate_random_gk_question)
+        fi
 
-        # 20-second delay between each message request
+        ((response_count++))
+        send_request "$random_message" "$api_key" "$response_count"
         sleep 20
     done
 }
 
-# Start the single thread
 start_thread &
 
-# Wait for the thread to finish (this will run indefinitely)
 wait
 
-# Graceful exit handling (SIGINT, SIGTERM)
 trap "echo -e '\n🛑 Process terminated. Exiting gracefully...'; exit 0" SIGINT SIGTERM
