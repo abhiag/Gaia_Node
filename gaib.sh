@@ -160,7 +160,7 @@ API_URL="https://gacrypto.gaia.domains/v1/chat/completions"
 # Display thread information
 echo "✅ Using 1 thread..."
 echo "⏳ Waiting 30 seconds before sending the first request..."
-sleep 30
+sleep 5
 
 echo "🚀 Starting requests..."
 start_time=$(date +%s)
