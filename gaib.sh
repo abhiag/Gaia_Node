@@ -114,14 +114,10 @@ EOF
     http_status=$(echo "$response" | tail -n 1)
     body=$(echo "$response" | head -n -1)
 
-    # Debugging: Print the entire raw response for inspection
-    echo "📊 Full Response: $body"
+    # Extract the 'content' from the JSON response using jq (Suppress errors)
+    response_message=$(echo "$body" | jq -r '.choices[0].message.content' 2>/dev/null)
 
     if [[ "$http_status" -eq 200 ]]; then
-        # Extract the 'content' from the JSON response using jq
-        response_message=$(echo "$body" | jq -r '.choices[0].message.content')
-
-        # Check if the response is not empty
         if [[ -z "$response_message" ]]; then
             echo "⚠️ Response content is empty!"
         else
