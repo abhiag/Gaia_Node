@@ -178,5 +178,5 @@ while true; do
 
     random_message=$(generate_random_general_question)
     send_request "$random_message" "$api_key"
-    sleep 0
+    sleep 1
 done
