@@ -21,7 +21,7 @@ check_cuda() {
 check_cuda
 
 # List of general questions
-general_questions = (
+general_questions=(
     "What is 5 + 3?"
     "How much is 7 + 9?"
     "What is the sum of 10 and 15?"
