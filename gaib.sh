@@ -85,7 +85,6 @@ general_questions=(
     "Why do people speak different languages?"
     "How does renewable energy work?"
     "Why do some animals hibernate?"
-
 )
 
 # Function to get a random general question
