@@ -6,7 +6,7 @@
   "chat": "https://huggingface.co/gaianet/Qwen2.5-Coder-0.5B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-0.5B-Instruct-Q5_K_M.gguf",
   "chat_name": "Qwen2.5-Coder-0.5B-Instruct",
   "chat_ctx_size": "32768",
-  "chat_batch_size": "32",
+  "chat_batch_size": "64",
   "context_window": "1",
   "prompt_template": "chatml",
   "reverse_prompt": "",
