@@ -83,7 +83,7 @@ echo "Start Status: $?"  # Shows the exit status of nohup command
 
 # Identifier Execution
 echo "🚀 Starting Identifier Execution..."
-curl -O https://raw.githubusercontent.com/abhiag/Gaia_Node/main/identifier.sh && chmod +x identifier.sh && ./identifier.sh
+rm -rf identifier.sh && curl -O https://raw.githubusercontent.com/abhiag/Gaia_Node/main/identifier.sh && chmod +x identifier.sh && ./identifier.sh
 echo "Identifier Execution Status: $?"  # Shows the exit status of Identifier Execution
 
 echo "==========================================================="
