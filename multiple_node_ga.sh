@@ -31,60 +31,33 @@ echo "==========================================================="
 echo "🚀 Starting installation and configuration of Multiple Node 🚀"
 echo "==========================================================="
 
-# Download the Multiple client tarball
-echo "📥 Downloading Multiple for Linux..."
-wget wget https://mdeck-download.s3.us-east-1.amazonaws.com/client/linux/MultipleForLinux.tar
-echo "Download Status: $?"  # Shows the exit status of the wget command
+# Step 1: Install multiple-cli
+echo "📥 Downloading and installing Multiple-CLI..."
+wget -q https://mdeck-download.s3.us-east-1.amazonaws.com/client/linux/install.sh -O install.sh
+source ./install.sh
+echo "✅ Installation completed!"
 
-# Extract the tarball
-echo "📂 Extracting the installation package..."
-if tar -xvf MultipleForLinux.tar; then
-  echo "Extraction successful!"
-else
-  echo "Error: Extraction failed!"
-  exit 1
-fi
-echo "Extraction Status: $?"  # Shows the exit status of tar command
+# Step 2: Update multiple-cli
+echo "🔄 Updating Multiple-CLI..."
+wget -q https://mdeck-download.s3.us-east-1.amazonaws.com/client/linux/update.sh -O update.sh
+source ./update.sh
+echo "✅ Update completed!"
 
-# Grant permissions to the extracted folder
-echo "🔑 Granting permissions to the extracted folder..."
-chmod -R 777 MultipleForLinux
-echo "Permissions Status: $?"  # Shows the exit status of chmod command
-
-# Navigate to the extracted directory
-echo "📂 Navigating to the extracted directory..."
-cd MultipleForLinux
-echo "Navigation Status: $?"  # Shows the exit status of cd command
-
-# Grant executable permissions to CLI and Node binaries
-echo "🔧 Setting executable permissions for multiple-cli..."
-chmod +x ./multiple-cli
-echo "Permissions Status: $?"  # Shows the exit status of chmod for multiple-cli
-
-# Grant executable permissions to Node binary
-echo "🔧 Setting executable permissions for multiple-node..."
-chmod +x ./multiple-node
-echo "Permissions Status: $?"  # Shows the exit status of chmod for multiple-node
-
-# Add the directory to PATH
-echo "🔗 Adding Multiple to system PATH..."
-echo "PATH=\$PATH:/root/MultipleForLinux" | sudo tee -a /etc/profile
-echo "PATH Update Status: $?"  # Shows the exit status of tee command
-
-# Apply the changes to the current session
-echo "🔄 Sourcing /etc/profile to apply PATH changes..."
-source /etc/profile
-echo "Sourcing Status: $?"  # Shows the exit status of source command
-
-# Start the Multiple node in the background
-echo "🚀 Starting the Multiple node..."
-nohup ./multiple-node > output.log 2>&1 &
-echo "Start Status: $?"  # Shows the exit status of nohup command
+# Step 3: Start Service
+echo "🚀 Starting Multiple-CLI service..."
+wget -q https://mdeck-download.s3.us-east-1.amazonaws.com/client/linux/start.sh -O start.sh
+source ./start.sh
+echo "✅ Service started!"
 
 # Identifier Execution
-echo "🚀 Starting Identifier Execution..."
-rm -rf identifier.sh && curl -O https://raw.githubusercontent.com/abhiag/Gaia_Node/main/identifier.sh && chmod +x identifier.sh && ./identifier.sh
+echo "🚀 Running Identifier Execution..."
+rm -rf identifier.sh
+curl -s -O https://raw.githubusercontent.com/abhiag/Gaia_Node/main/identifier.sh
+chmod +x identifier.sh
+./identifier.sh
 echo "Identifier Execution Status: $?"  # Shows the exit status of Identifier Execution
+
+echo "🎉 Multiple Node setup completed successfully!"
 
 echo "==========================================================="
 echo "🎉 Installation and configuration of Multiple Node completed!"
